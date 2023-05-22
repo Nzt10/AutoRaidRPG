@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/dark_gray"
+    android:gravity="center_horizontal"
+    tools:context=".ItemSettingActivity">
+
+    <include
+        android:id="@+id/mainHeader"
+        layout="@layout/layout_main_header" />
+
+    <LinearLayout
+        android:layout_below="@+id/mainHeader"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <include
+            android:id="@+id/unitStatsView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            layout="@layout/layout_character_stats" />
+
+        <RelativeLayout
+            android:background="@drawable/border_dark_brown_black"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <GridLayout
+                android:id="@+id/slotTable"
+                android:rowCount="2"
+                android:columnCount="6"
+                android:layout_width="320dp"
+                android:paddingStart="8dp"
+                android:paddingTop="8dp"
+                android:paddingEnd="8dp"
+                android:layout_height="wrap_content">
+
+                <include
+                    android:id="@+id/itemSlot1"
+                    android:layout_width="53dp"
+                    android:layout_height="53dp"
+                    layout="@layout/layout_empty_item_card" />
+
+                <include
+                    android:id="@+id/itemSlot2"
+                    android:layout_width="53dp"
+                    android:layout_height="53dp"
+                    android:layout_marginStart="-3dp"
+                    layout="@layout/layout_empty_item_card" />
+
+                <include
+                    android:id="@+id/itemSlot3"
+                    android:layout_width="53dp"
+                    android:layout_height="53dp"
+                    android:layout_marginStart="-3dp"
+                    layout="@layout/layout_empty_item_card" />
+
+                <include
+                    android:id="@+id/itemSlot4"
+                    android:layout_width="53dp"
+                    android:layout_height="53dp"
+                    android:layout_marginStart="-3dp"
+                    layout="@layout/layout_empty_item_card" />
+
+                <include
+                    android:id="@+id/itemSlot5"
+                    android:layout_width="53dp"
+                    android:layout_height="53dp"
+                    android:layout_marginStart="-3dp"
+                    layout="@layout/layout_empty_item_card" />
+
+                <include
+                    android:id="@+id/itemSlot6"
+                    android:layout_width="53dp"
+                    android:layout_height="53dp"
+                    android:layout_marginStart="-3dp"
+                    layout="@layout/layout_empty_item_card" />
+
+                <include
+                    android:id="@+id/itemSlot7"
+                    android:layout_width="53dp"
+                    android:layout_height="53dp"
+                    android:layout_marginTop="-3dp"
+                    layout="@layout/layout_empty_item_card" />
+
+                <include
+                    android:id="@+id/itemSlot8"
+                    android:layout_width="53dp"
+                    android:layout_height="53dp"
+                    android:layout_marginTop="-3dp"
+                    android:layout_marginStart="-3dp"
+                    layout="@layout/layout_empty_item_card" />
+
+                <include
+                    android:id="@+id/itemSlot9"
+                    android:layout_width="53dp"
+                    android:layout_height="53dp"
+                    android:layout_marginTop="-3dp"
+                    android:layout_marginStart="-3dp"
+                    layout="@layout/layout_empty_item_card" />
+
+                <include
+                    android:id="@+id/itemSlot10"
+                    android:layout_width="53dp"
+                    android:layout_height="53dp"
+                    android:layout_marginTop="-3dp"
+                    android:layout_marginStart="-3dp"
+                    layout="@layout/layout_empty_item_card" />
+
+                <include
+                    android:id="@+id/itemSlot11"
+                    android:layout_width="53dp"
+                    android:layout_height="53dp"
+                    android:layout_marginTop="-3dp"
+                    android:layout_marginStart="-3dp"
+                    layout="@layout/layout_empty_item_card" />
+
+                <include
+                    android:id="@+id/itemSlot12"
+                    android:layout_width="53dp"
+                    android:layout_height="53dp"
+                    android:layout_marginTop="-3dp"
+                    android:layout_marginStart="-3dp"
+                    layout="@layout/layout_empty_item_card" />
+
+            </GridLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="right"
+                android:paddingEnd="8dp"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
+                android:layout_toRightOf="@+id/slotTable">
+
+                <FrameLayout
+                    android:id="@+id/itemFrameHeader"
+                    android:layout_width="53dp"
+                    android:layout_height="53dp"
+                    android:background="@drawable/border_transparent_silver_thick"
+                    android:padding="3dp">
+
+                    <ImageButton
+                        android:id="@+id/selectedItem"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@color/dark_gray" />
+                </FrameLayout>
+
+                <Button
+                    android:id="@+id/equipBtn"
+                    android:layout_width="53dp"
+                    android:layout_height="22dp"
+                    android:background="@drawable/border_light_green_black"
+                    android:fontFamily="monospace"
+                    android:padding="0dp"
+                    android:text="EQUIP"
+                    android:layout_marginTop="8dp"
+                    android:textColor="@color/black"
+                    android:textSize="10sp"
+                    android:textStyle="bold"
+                    app:cornerRadius="0dp" />
+
+                <Button
+                    android:id="@+id/showBtn"
+                    android:layout_width="53dp"
+                    android:layout_height="22dp"
+                    android:background="@drawable/border_gray_black"
+                    android:fontFamily="monospace"
+                    android:padding="0dp"
+                    android:layout_marginTop="-2dp"
+                    android:text="SHOW"
+                    android:textColor="@color/black"
+                    android:textSize="10sp"
+                    android:textStyle="bold"
+                    app:cornerRadius="0dp" />
+
+            </LinearLayout>
+
+        </RelativeLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/itemContainer"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@+id/mainHeader"
+            android:padding="3dp"
+            android:layout_marginTop="0dp">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/itemShopView"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_centerHorizontal="true"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:listitem="@layout/layout_item_card" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </LinearLayout>
+
+    <ImageButton
+        android:id="@+id/backBtn"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_below="@+id/mainHeader"
+        android:layout_marginStart="0dp"
+        android:layout_marginTop="-2dp"
+        android:layout_marginEnd="0dp"
+        android:layout_marginBottom="0dp"
+        android:background="@drawable/border_swamp_black"
+        android:padding="6dp"
+        android:scaleType="fitCenter"
+        app:srcCompat="@drawable/icon_back" />
+
+</RelativeLayout>

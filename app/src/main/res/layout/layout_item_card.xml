@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:background="@drawable/border_transparent_silver_thick"
+    android:padding="@dimen/border_padding"
+    android:layout_margin="@dimen/item_margin"
+    android:layout_width="@dimen/item_size"
+    android:layout_height="@dimen/item_size">
+
+    <ImageButton
+        android:id="@+id/itemBtn"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/dark_gray"
+        android:scaleType="fitCenter"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+    <LinearLayout
+        android:id="@+id/ratingView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <ImageView
+            android:id="@+id/rating1"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:padding="0dp"
+            android:visibility="gone"
+            android:src="@drawable/shape_rating"/>
+
+        <ImageView
+            android:id="@+id/rating2"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginLeft="-7dp"
+            android:padding="0dp"
+            android:visibility="gone"
+            android:src="@drawable/shape_rating"/>
+
+        <ImageView
+            android:id="@+id/rating3"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginLeft="-7dp"
+            android:padding="0dp"
+            android:visibility="gone"
+            android:src="@drawable/shape_rating"/>
+
+        <ImageView
+            android:id="@+id/rating4"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginLeft="-7dp"
+            android:padding="0dp"
+            android:visibility="gone"
+            android:src="@drawable/shape_rating"/>
+
+        <ImageView
+            android:id="@+id/rating5"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginLeft="-7dp"
+            android:padding="0dp"
+            android:visibility="gone"
+            android:src="@drawable/shape_rating"/>
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

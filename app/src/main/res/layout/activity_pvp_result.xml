@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/dark_gray"
+    tools:context=".PvpResultActivity">
+
+    <include
+        android:id="@+id/mainHeader"
+        layout="@layout/layout_auth_header" />
+
+    <LinearLayout
+        android:layout_below="@+id/mainHeader"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="30dp"
+        android:gravity="center">
+
+        <TextView
+            android:id="@+id/resultTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="monospace"
+            android:text="WINNER"
+            android:textAlignment="center"
+            android:textColor="@color/white"
+            android:textSize="22sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/resultDescription"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="monospace"
+            android:text="this is a result description."
+            android:textAlignment="center"
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:layout_marginTop="25dp"/>
+
+        <TextView
+            android:id="@+id/resultRewards"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="monospace"
+            android:text="reward 1\nreward 2"
+            android:textAlignment="center"
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:layout_marginTop="25dp"/>
+
+        <Button
+            android:id="@+id/battleFormationBtn"
+            android:layout_width="200dp"
+            android:layout_height="25dp"
+            android:background="@drawable/border_swamp_black"
+            android:fontFamily="monospace"
+            android:padding="0dp"
+            android:text="Battle Information"
+            android:textColor="@color/black"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            app:cornerRadius="0dp"
+            android:layout_marginTop="100dp" />
+
+        <Button
+            android:id="@+id/homeBtn"
+            android:layout_width="200dp"
+            android:layout_height="25dp"
+            android:background="@drawable/border_light_green_black"
+            android:fontFamily="monospace"
+            android:padding="0dp"
+            android:text="HOME"
+            android:textColor="@color/black"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            app:cornerRadius="0dp"
+            android:layout_marginTop="10dp" />
+
+        <Button
+            android:id="@+id/arenaBtn"
+            android:layout_width="200dp"
+            android:layout_height="25dp"
+            android:background="@drawable/border_red_black"
+            android:fontFamily="monospace"
+            android:padding="0dp"
+            android:text="PROCEED TO MAP"
+            android:textColor="@color/black"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            app:cornerRadius="0dp"
+            android:layout_marginTop="10dp" />
+
+    </LinearLayout>
+
+</RelativeLayout>

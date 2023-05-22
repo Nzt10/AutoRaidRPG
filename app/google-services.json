@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "835234163496",
+    "project_id": "auto-raid-rpg",
+    "storage_bucket": "auto-raid-rpg.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:835234163496:android:83b77b075bcefc0a7a3e1d",
+        "android_client_info": {
+          "package_name": "com.example.autoraidrpg"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "835234163496-2jhdt58m0db2ngs58snkprcg3683519m.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDsNT0f9TqCVqpo7haWjNsz4bzi70wbprQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "835234163496-2jhdt58m0db2ngs58snkprcg3683519m.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

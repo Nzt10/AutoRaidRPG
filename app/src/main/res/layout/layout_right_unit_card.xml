@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="@dimen/unit_width"
+    android:layout_height="@dimen/unit_height">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraintLayout"
+        android:layout_width="@dimen/battle_unit_width"
+        android:layout_height="@dimen/unit_height"
+        android:background="@drawable/border_transparent_silver_thick"
+        android:padding="@dimen/border_padding"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageButton
+            android:id="@+id/unitImageBtn"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/dark_gray"
+            android:padding="0dp"
+            android:scaleType="fitCenter"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <LinearLayout
+            android:id="@+id/linearLayout"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/rating_size"
+            android:gravity="center"
+            android:orientation="horizontal"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <ImageView
+                android:id="@+id/rating1"
+                android:layout_width="@dimen/rating_size"
+                android:layout_height="wrap_content"
+                android:layout_margin="0dp"
+                android:layout_marginStart="-3dp"
+                android:padding="0dp"
+                android:visibility="gone"
+                android:src="@drawable/shape_rating" />
+
+            <ImageView
+                android:id="@+id/rating2"
+                android:layout_width="@dimen/rating_size"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="-3dp"
+                android:padding="0dp"
+                android:visibility="gone"
+                android:src="@drawable/shape_rating" />
+
+            <ImageView
+                android:id="@+id/rating3"
+                android:layout_width="@dimen/rating_size"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="-3dp"
+                android:padding="0dp"
+                android:visibility="gone"
+                android:src="@drawable/shape_rating" />
+
+            <ImageView
+                android:id="@+id/rating4"
+                android:layout_width="@dimen/rating_size"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="-3dp"
+                android:padding="0dp"
+                android:visibility="gone"
+                android:src="@drawable/shape_rating" />
+
+            <ImageView
+                android:id="@+id/rating5"
+                android:layout_width="@dimen/rating_size"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="-3dp"
+                android:padding="0dp"
+                android:visibility="gone"
+                android:src="@drawable/shape_rating" />
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <ProgressBar
+        android:id="@+id/healthBar"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="10dp"
+        android:layout_height="match_parent"
+        android:layout_centerInParent="true"
+        android:layout_weight="1"
+        android:max="0"
+        android:progress="0"
+        android:progressDrawable="@drawable/progress_drawable_vertical"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:layout_editor_absoluteY="3dp" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

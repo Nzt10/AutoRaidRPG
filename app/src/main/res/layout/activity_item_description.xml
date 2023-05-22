@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/dark_gray"
+    tools:context=".ItemDescriptionActivity">
+
+    <include
+        android:id="@+id/mainHeader"
+        layout="@layout/layout_main_header" />
+
+    <ScrollView
+        android:id="@+id/scrollItemView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/mainHeader"
+        android:layout_marginTop="-1dp"
+        android:paddingStart="2dp"
+        android:paddingEnd="2dp"
+        android:paddingBottom="2dp"
+        android:paddingTop="30dp"
+        android:background="@drawable/border_dark_gray_black">
+
+        <include
+            android:id="@+id/layoutItemDescription"
+            layout="@layout/layout_item_description"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+    </ScrollView>
+
+    <TextView
+        android:id="@+id/hintText"
+        android:layout_width="match_parent"
+        android:layout_height="32dp"
+        android:text="long click the item icon to merge"
+        android:textAlignment="textEnd"
+        android:layout_below="@+id/mainHeader"
+        android:fontFamily="monospace"
+        android:paddingStart="15dp"
+        android:paddingEnd="15dp"
+        android:paddingTop="5dp"
+        android:paddingBottom="5dp"
+        android:textColor="@color/white"
+        android:background="@color/dark_gray_a25"
+        android:textSize="12sp" />
+
+    <ImageButton
+        android:id="@+id/backBtn"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_below="@+id/mainHeader"
+        android:layout_marginStart="0dp"
+        android:layout_marginTop="-2dp"
+        android:layout_marginEnd="0dp"
+        android:layout_marginBottom="0dp"
+        android:background="@drawable/border_swamp_black"
+        android:padding="6dp"
+        android:scaleType="fitCenter"
+        app:srcCompat="@drawable/icon_back" />
+
+</RelativeLayout>

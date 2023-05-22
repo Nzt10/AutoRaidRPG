@@ -1,0 +1,488 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical"
+    android:background="@color/dark_gray"
+    android:padding="40dp">
+
+    <FrameLayout
+        android:id="@+id/itemFrameHeader"
+        android:layout_width="@dimen/unit_width"
+        android:layout_height="@dimen/unit_height"
+        android:background="@drawable/border_transparent_silver_thick"
+        android:padding="1dp">
+
+        <include
+            android:id="@+id/roleImageView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            layout="@layout/layout_simple_character_card"/>
+    </FrameLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_toEndOf="@+id/itemFrameHeader"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/roleName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="monospace"
+            android:layout_marginTop="5dp"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:text="character name"
+            android:textAlignment="textStart"
+            android:textColor="@color/white"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/level"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="monospace"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:text="level xxx"
+            android:layout_marginTop="5dp"
+            android:textAlignment="textStart"
+            android:textColor="@color/white"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="5dp"
+            android:paddingStart="5dp">
+
+            <ImageView
+                android:id="@+id/rating1"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:visibility="gone"
+                android:src="@drawable/shape_rating"/>
+
+            <ImageView
+                android:id="@+id/rating2"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:visibility="gone"
+                android:layout_marginStart="-6dp"
+                android:src="@drawable/shape_rating"/>
+
+            <ImageView
+                android:id="@+id/rating3"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:visibility="gone"
+                android:layout_marginStart="-6dp"
+                android:src="@drawable/shape_rating"/>
+
+            <ImageView
+                android:id="@+id/rating4"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:visibility="gone"
+                android:layout_marginStart="-6dp"
+                android:src="@drawable/shape_rating"/>
+
+            <ImageView
+                android:id="@+id/rating5"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:visibility="gone"
+                android:layout_marginStart="-6dp"
+                android:src="@drawable/shape_rating"/>
+
+        </LinearLayout>
+
+        <GridLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="10dp"
+            android:rowCount="6"
+            android:columnCount="4"
+            android:layout_marginStart="8dp"
+            android:layout_gravity="center">
+
+            <TextView
+                android:id="@+id/healthTitle"
+                android:layout_width="55dp"
+                android:layout_height="wrap_content"
+                android:fontFamily="monospace"
+                android:padding="0dp"
+                android:layout_columnSpan="1"
+                android:layout_rowSpan="1"
+                android:text="Health"
+                android:layout_marginTop="3dp"
+                android:textColor="@color/light_gray"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                app:cornerRadius="0dp" />
+
+            <TextView
+                android:id="@+id/health"
+                android:layout_width="50dp"
+                android:layout_height="wrap_content"
+                android:fontFamily="monospace"
+                android:padding="0dp"
+                android:layout_columnSpan="1"
+                android:layout_rowSpan="1"
+                android:text="1000"
+                android:layout_marginTop="3dp"
+                android:textColor="@color/white"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                app:cornerRadius="0dp" />
+
+            <TextView
+                android:id="@+id/criticalChanceTitle"
+                android:layout_width="65dp"
+                android:layout_height="wrap_content"
+                android:fontFamily="monospace"
+                android:padding="0dp"
+                android:layout_columnSpan="1"
+                android:layout_rowSpan="1"
+                android:text="Crit %"
+                android:layout_marginTop="3dp"
+                android:textColor="@color/light_gray"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:layout_marginStart="-2dp"
+                app:cornerRadius="0dp" />
+
+            <TextView
+                android:id="@+id/criticalChance"
+                android:layout_width="50dp"
+                android:layout_height="wrap_content"
+                android:fontFamily="monospace"
+                android:padding="0dp"
+                android:layout_columnSpan="1"
+                android:layout_rowSpan="1"
+                android:text="50%"
+                android:layout_marginTop="3dp"
+                android:textColor="@color/white"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                app:cornerRadius="0dp" />
+
+            <TextView
+                android:id="@+id/physicalDamageTitle"
+                android:layout_width="55dp"
+                android:layout_height="wrap_content"
+                android:fontFamily="monospace"
+                android:padding="0dp"
+                android:layout_columnSpan="1"
+                android:layout_rowSpan="1"
+                android:text="Phy Dmg"
+                android:layout_marginTop="3dp"
+                android:textColor="@color/light_gray"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                app:cornerRadius="0dp" />
+
+            <TextView
+                android:id="@+id/physicalDamage"
+                android:layout_width="50dp"
+                android:layout_height="wrap_content"
+                android:fontFamily="monospace"
+                android:padding="0dp"
+                android:layout_columnSpan="1"
+                android:layout_rowSpan="1"
+                android:text="1000"
+                android:layout_marginTop="3dp"
+                android:textColor="@color/white"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                app:cornerRadius="0dp" />
+
+            <TextView
+                android:id="@+id/criticalDamageTitle"
+                android:layout_width="65dp"
+                android:layout_height="wrap_content"
+                android:fontFamily="monospace"
+                android:padding="0dp"
+                android:layout_columnSpan="1"
+                android:layout_rowSpan="1"
+                android:text="Crit Dmg"
+                android:layout_marginTop="3dp"
+                android:textColor="@color/light_gray"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:layout_marginStart="-2dp"
+                app:cornerRadius="0dp" />
+
+            <TextView
+                android:id="@+id/criticalDamage"
+                android:layout_width="50dp"
+                android:layout_height="wrap_content"
+                android:fontFamily="monospace"
+                android:padding="0dp"
+                android:layout_columnSpan="1"
+                android:layout_rowSpan="1"
+                android:text="100%"
+                android:layout_marginTop="3dp"
+                android:textColor="@color/white"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                app:cornerRadius="0dp" />
+
+            <TextView
+                android:id="@+id/magicalDamageTitle"
+                android:layout_width="55dp"
+                android:layout_height="wrap_content"
+                android:fontFamily="monospace"
+                android:padding="0dp"
+                android:layout_columnSpan="1"
+                android:layout_rowSpan="1"
+                android:text="Mag Dmg"
+                android:layout_marginTop="3dp"
+                android:textColor="@color/light_gray"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                app:cornerRadius="0dp" />
+
+            <TextView
+                android:id="@+id/magicalDamage"
+                android:layout_width="50dp"
+                android:layout_height="wrap_content"
+                android:fontFamily="monospace"
+                android:padding="0dp"
+                android:layout_columnSpan="1"
+                android:layout_rowSpan="1"
+                android:text="1000"
+                android:layout_marginTop="3dp"
+                android:textColor="@color/white"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                app:cornerRadius="0dp" />
+
+            <TextView
+                android:id="@+id/dodgeTitle"
+                android:layout_width="65dp"
+                android:layout_height="wrap_content"
+                android:fontFamily="monospace"
+                android:padding="0dp"
+                android:layout_columnSpan="1"
+                android:layout_rowSpan="1"
+                android:text="Dodge"
+                android:layout_marginTop="3dp"
+                android:textColor="@color/light_gray"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:layout_marginStart="-2dp"
+                app:cornerRadius="0dp" />
+
+            <TextView
+                android:id="@+id/dodge"
+                android:layout_width="50dp"
+                android:layout_height="wrap_content"
+                android:fontFamily="monospace"
+                android:padding="0dp"
+                android:layout_columnSpan="1"
+                android:layout_rowSpan="1"
+                android:text="50%"
+                android:layout_marginTop="3dp"
+                android:textColor="@color/white"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                app:cornerRadius="0dp" />
+
+            <TextView
+                android:id="@+id/physicalDefenseTitle"
+                android:layout_width="55dp"
+                android:layout_height="wrap_content"
+                android:fontFamily="monospace"
+                android:padding="0dp"
+                android:layout_columnSpan="1"
+                android:layout_rowSpan="1"
+                android:text="Phy Def"
+                android:layout_marginTop="3dp"
+                android:textColor="@color/light_gray"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                app:cornerRadius="0dp" />
+
+            <TextView
+                android:id="@+id/physicalDefense"
+                android:layout_width="50dp"
+                android:layout_height="wrap_content"
+                android:fontFamily="monospace"
+                android:padding="0dp"
+                android:layout_columnSpan="1"
+                android:layout_rowSpan="1"
+                android:text="1000"
+                android:layout_marginTop="3dp"
+                android:textColor="@color/white"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                app:cornerRadius="0dp" />
+
+            <TextView
+                android:id="@+id/armorPenetrationTitle"
+                android:layout_width="65dp"
+                android:layout_height="wrap_content"
+                android:fontFamily="monospace"
+                android:padding="0dp"
+                android:layout_columnSpan="1"
+                android:layout_rowSpan="1"
+                android:text="Arm Pen"
+                android:layout_marginTop="3dp"
+                android:textColor="@color/light_gray"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:layout_marginStart="-2dp"
+                app:cornerRadius="0dp" />
+
+            <TextView
+                android:id="@+id/armorPenetration"
+                android:layout_width="50dp"
+                android:layout_height="wrap_content"
+                android:fontFamily="monospace"
+                android:padding="0dp"
+                android:layout_columnSpan="1"
+                android:layout_rowSpan="1"
+                android:text="50%"
+                android:layout_marginTop="3dp"
+                android:textColor="@color/white"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                app:cornerRadius="0dp" />
+
+            <TextView
+                android:id="@+id/magicalDefenseTitle"
+                android:layout_width="55dp"
+                android:layout_height="wrap_content"
+                android:layout_rowSpan="1"
+                android:layout_columnSpan="1"
+                android:layout_marginTop="3dp"
+                android:fontFamily="monospace"
+                android:padding="0dp"
+                android:text="Mag Def"
+                android:textColor="@color/light_gray"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                app:cornerRadius="0dp" />
+
+            <TextView
+                android:id="@+id/magicalDefense"
+                android:layout_width="50dp"
+                android:layout_height="wrap_content"
+                android:fontFamily="monospace"
+                android:padding="0dp"
+                android:layout_columnSpan="1"
+                android:layout_rowSpan="1"
+                android:text="1000"
+                android:layout_marginTop="3dp"
+                android:textColor="@color/white"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                app:cornerRadius="0dp" />
+
+            <TextView
+                android:id="@+id/magicPenetrationTitle"
+                android:layout_width="65dp"
+                android:layout_height="wrap_content"
+                android:fontFamily="monospace"
+                android:padding="0dp"
+                android:layout_columnSpan="1"
+                android:layout_rowSpan="1"
+                android:text="Mag Pen"
+                android:layout_marginTop="3dp"
+                android:textColor="@color/light_gray"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:layout_marginStart="-2dp"
+                app:cornerRadius="0dp" />
+
+            <TextView
+                android:id="@+id/magicPenetration"
+                android:layout_width="50dp"
+                android:layout_height="wrap_content"
+                android:fontFamily="monospace"
+                android:padding="0dp"
+                android:layout_columnSpan="1"
+                android:layout_rowSpan="1"
+                android:text="50%"
+                android:layout_marginTop="3dp"
+                android:textColor="@color/white"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                app:cornerRadius="0dp" />
+
+            <TextView
+                android:id="@+id/speedTitle"
+                android:layout_width="55dp"
+                android:layout_height="wrap_content"
+                android:fontFamily="monospace"
+                android:padding="0dp"
+                android:layout_columnSpan="1"
+                android:layout_rowSpan="1"
+                android:text="Speed"
+                android:layout_marginTop="3dp"
+                android:textColor="@color/light_gray"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                app:cornerRadius="0dp" />
+
+            <TextView
+                android:id="@+id/speed"
+                android:layout_width="50dp"
+                android:layout_height="wrap_content"
+                android:fontFamily="monospace"
+                android:padding="0dp"
+                android:layout_columnSpan="1"
+                android:layout_rowSpan="1"
+                android:text="1000"
+                android:layout_marginTop="3dp"
+                android:textColor="@color/white"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                app:cornerRadius="0dp" />
+
+            <TextView
+                android:id="@+id/accuracyTitle"
+                android:layout_width="65dp"
+                android:layout_height="wrap_content"
+                android:fontFamily="monospace"
+                android:padding="0dp"
+                android:layout_columnSpan="1"
+                android:layout_rowSpan="1"
+                android:text="Accuracy"
+                android:layout_marginTop="3dp"
+                android:textColor="@color/light_gray"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:layout_marginStart="-2dp"
+                app:cornerRadius="0dp" />
+
+            <TextView
+                android:id="@+id/accuracy"
+                android:layout_width="50dp"
+                android:layout_height="wrap_content"
+                android:fontFamily="monospace"
+                android:padding="0dp"
+                android:layout_columnSpan="1"
+                android:layout_rowSpan="1"
+                android:text="50%"
+                android:layout_marginTop="3dp"
+                android:textColor="@color/white"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                app:cornerRadius="0dp" />
+
+        </GridLayout>
+
+    </LinearLayout>
+
+</RelativeLayout>

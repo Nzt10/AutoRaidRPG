@@ -1,0 +1,3247 @@
+Index: app/src/main/java/com/example/autoraidrpg/map/Locator.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/autoraidrpg/map/Locator.java b/app/src/main/java/com/example/autoraidrpg/map/Locator.java
+--- a/app/src/main/java/com/example/autoraidrpg/map/Locator.java	
++++ b/app/src/main/java/com/example/autoraidrpg/map/Locator.java	(date 1684592191773)
+@@ -35,7 +35,7 @@
+ 
+         // create a marker for each user with valid location
+         for (User otherUser : users) {
+-            if (user.getId() != otherUser.getId() && (otherUser.getLongitude() != 0 && otherUser.getLatitude() != 0)) {
++            if (!user.getFirebaseID().equalsIgnoreCase(otherUser.getFirebaseID()) && (otherUser.getLongitude() != 0 && otherUser.getLatitude() != 0)) {
+                 Marker marker = new Marker(activity.getMap());
+                 marker.setPosition(new GeoPoint(otherUser.getLatitude(), otherUser.getLongitude()));
+                 marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+Index: app/src/main/java/com/example/autoraidrpg/map/UserInfoWindow.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/autoraidrpg/map/UserInfoWindow.java b/app/src/main/java/com/example/autoraidrpg/map/UserInfoWindow.java
+--- a/app/src/main/java/com/example/autoraidrpg/map/UserInfoWindow.java	
++++ b/app/src/main/java/com/example/autoraidrpg/map/UserInfoWindow.java	(date 1684604606493)
+@@ -7,6 +7,9 @@
+ import com.example.autoraidrpg.R;
+ import com.example.autoraidrpg.adapter.PreparationUnitInfoAdapter;
+ import com.example.autoraidrpg.database.DatabaseHelper;
++import com.example.autoraidrpg.database.dao.cloud.FormationCloudDAO;
++import com.example.autoraidrpg.database.dao.cloud.PositionCloudDAO;
++import com.example.autoraidrpg.database.dao.cloud.RoleCollectionCloudDAO;
+ import com.example.autoraidrpg.database.dao.local.FormationLocalDAO;
+ import com.example.autoraidrpg.database.dao.local.PositionLocalDAO;
+ import com.example.autoraidrpg.database.dao.local.RoleCollectionLocalDAO;
+@@ -55,7 +58,8 @@
+             textView.setText(info);
+ 
+             // retrieve battle formation
+-            formations = FormationLocalDAO.all(databaseHelper, user.getId());
++            // formations = FormationLocalDAO.all(databaseHelper, user.getId());
++            formations = new FormationCloudDAO(Pvp.getInstance().getActivity()).retrieveAll(user.getFirebaseID());
+             AtomicInteger formationCount = new AtomicInteger(0);
+             hasBeenSet = false;
+ 
+@@ -65,16 +69,28 @@
+ 
+                 // get all positions
+                 List<Position> positions = new ArrayList<>();
++                /*
+                 positions.add(PositionLocalDAO.getByID(databaseHelper, formation.getPositionID_A()));
+                 positions.add(PositionLocalDAO.getByID(databaseHelper, formation.getPositionID_B()));
+                 positions.add(PositionLocalDAO.getByID(databaseHelper, formation.getPositionID_C()));
+                 positions.add(PositionLocalDAO.getByID(databaseHelper, formation.getPositionID_D()));
+                 positions.add(PositionLocalDAO.getByID(databaseHelper, formation.getPositionID_E()));
++                 */
++                /*
++                PositionCloudDAO positionCloudDAO = new PositionCloudDAO(Pvp.getInstance().getActivity());
++                positions.add(positionCloudDAO.retrieve(formation.getPositionFirebaseID_A()));
++                positions.add(positionCloudDAO.retrieve(formation.getPositionFirebaseID_B()));
++                positions.add(positionCloudDAO.retrieve(formation.getPositionFirebaseID_C()));
++                positions.add(positionCloudDAO.retrieve(formation.getPositionFirebaseID_D()));
++                positions.add(positionCloudDAO.retrieve(formation.getPositionFirebaseID_E()));
++
++                 */
+ 
+                 // set role collections
+                 List<RoleCollection> roleCollectionList = new ArrayList<>();
+                 positions.forEach(position -> {
+-                    if(position.getIndex() != -1) roleCollectionList.add(RoleCollectionLocalDAO.retrieve(databaseHelper, user.getId(), position.getRoleCollectionID()));
++                    // if(position.getIndex() != -1) roleCollectionList.add(RoleCollectionLocalDAO.retrieve(databaseHelper, user.getId(), position.getRoleCollectionID()));
++                    if(position.getIndex() != -1) roleCollectionList.add(new RoleCollectionCloudDAO(Pvp.getInstance().getActivity()).retrieve(position.getRoleCollectionFirebaseID()));
+                     else roleCollectionList.add(null);
+                 });
+ 
+Index: app/src/main/java/com/example/autoraidrpg/model/Bag.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/autoraidrpg/model/Bag.java b/app/src/main/java/com/example/autoraidrpg/model/Bag.java
+--- a/app/src/main/java/com/example/autoraidrpg/model/Bag.java	
++++ b/app/src/main/java/com/example/autoraidrpg/model/Bag.java	(date 1684602263449)
+@@ -18,6 +18,8 @@
+     private String inventoryFirebaseID_K;
+     private String inventoryFirebaseID_L;
+ 
++    public Bag() {}
++
+     public Bag(String firebaseID, String userFirebaseID, String roleCollectionFirebaseID, String inventoryFirebaseID_A, String inventoryFirebaseID_B, String inventoryFirebaseID_C, String inventoryFirebaseID_D, String inventoryFirebaseID_E, String inventoryFirebaseID_F, String inventoryFirebaseID_G, String inventoryFirebaseID_H, String inventoryFirebaseID_I, String inventoryFirebaseID_J, String inventoryFirebaseID_K, String inventoryFirebaseID_L) {
+         this.firebaseID = firebaseID;
+         this.userFirebaseID = userFirebaseID;
+Index: app/src/main/java/com/example/autoraidrpg/model/User.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/autoraidrpg/model/User.java b/app/src/main/java/com/example/autoraidrpg/model/User.java
+--- a/app/src/main/java/com/example/autoraidrpg/model/User.java	
++++ b/app/src/main/java/com/example/autoraidrpg/model/User.java	(date 1684602968633)
+@@ -4,6 +4,7 @@
+ 
+ public class User implements Serializable {
+ 
++    private String id;
+     private String firebaseID;
+     private String username;
+     private String email;
+@@ -14,6 +15,8 @@
+     private double exp;
+     private double diamond;
+ 
++    public User() {}
++
+     public User(String firebaseID, String username, String email, String password, double longitude, double latitude, double coin, double exp, double diamond) {
+         this.firebaseID = firebaseID;
+         this.username = username;
+@@ -26,6 +29,14 @@
+         this.diamond = diamond;
+     }
+ 
++    public String getId() {
++        return id;
++    }
++
++    public void setId(String id) {
++        this.id = id;
++    }
++
+     public void addGold(double gold) {
+         this.coin += gold;
+     }
+Index: app/src/main/java/com/example/autoraidrpg/model/Stage.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/autoraidrpg/model/Stage.java b/app/src/main/java/com/example/autoraidrpg/model/Stage.java
+--- a/app/src/main/java/com/example/autoraidrpg/model/Stage.java	
++++ b/app/src/main/java/com/example/autoraidrpg/model/Stage.java	(date 1684602128848)
+@@ -7,6 +7,8 @@
+     private String userFirebaseID;
+     private int value;
+ 
++    public Stage() {}
++
+     public Stage(String userFirebaseID, int value) {
+         this.userFirebaseID = userFirebaseID;
+         this.value = value;
+Index: app/src/main/java/com/example/autoraidrpg/model/Position.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/autoraidrpg/model/Position.java b/app/src/main/java/com/example/autoraidrpg/model/Position.java
+--- a/app/src/main/java/com/example/autoraidrpg/model/Position.java	
++++ b/app/src/main/java/com/example/autoraidrpg/model/Position.java	(date 1684602158936)
+@@ -9,6 +9,8 @@
+     private int index;
+     private boolean front;
+ 
++    public Position() {}
++
+     public Position(String firebaseID, String roleCollectionFirebaseID, int index, boolean front) {
+         this.firebaseID = firebaseID;
+         this.roleCollectionFirebaseID = roleCollectionFirebaseID;
+Index: app/src/main/java/com/example/autoraidrpg/model/Formation.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/autoraidrpg/model/Formation.java b/app/src/main/java/com/example/autoraidrpg/model/Formation.java
+--- a/app/src/main/java/com/example/autoraidrpg/model/Formation.java	
++++ b/app/src/main/java/com/example/autoraidrpg/model/Formation.java	(date 1684602191134)
+@@ -12,6 +12,8 @@
+     private String positionFirebaseID_D;
+     private String positionFirebaseID_E;
+ 
++    public Formation() {}
++
+     public Formation(String firebaseID, String userFirebaseID, String positionFirebaseID_A, String positionFirebaseID_B, String positionFirebaseID_C, String positionFirebaseID_D, String positionFirebaseID_E) {
+         this.firebaseID = firebaseID;
+         this.userFirebaseID = userFirebaseID;
+Index: app/src/main/java/com/example/autoraidrpg/model/Inventory.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/autoraidrpg/model/Inventory.java b/app/src/main/java/com/example/autoraidrpg/model/Inventory.java
+--- a/app/src/main/java/com/example/autoraidrpg/model/Inventory.java	
++++ b/app/src/main/java/com/example/autoraidrpg/model/Inventory.java	(date 1684602180763)
+@@ -9,6 +9,8 @@
+     private int itemID;
+     private int rating;
+ 
++    public Inventory() {}
++
+     public Inventory(String firebaseID, String userFirebaseID, int itemID, int rating) {
+         this.firebaseID = firebaseID;
+         this.userFirebaseID = userFirebaseID;
+Index: app/src/main/java/com/example/autoraidrpg/model/RoleCollection.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/autoraidrpg/model/RoleCollection.java b/app/src/main/java/com/example/autoraidrpg/model/RoleCollection.java
+--- a/app/src/main/java/com/example/autoraidrpg/model/RoleCollection.java	
++++ b/app/src/main/java/com/example/autoraidrpg/model/RoleCollection.java	(date 1684602139149)
+@@ -15,6 +15,8 @@
+     private int skillD;
+     private int skillE;
+ 
++    public RoleCollection() {}
++
+     public RoleCollection(String firebaseID, String userFirebaseID, int roleID, int level, int rating, int skillA, int skillB, int skillC, int skillD, int skillE) {
+         this.firebaseID = firebaseID;
+         this.userFirebaseID = userFirebaseID;
+Index: app/src/main/java/com/example/autoraidrpg/utils/UnitUtils.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/autoraidrpg/utils/UnitUtils.java b/app/src/main/java/com/example/autoraidrpg/utils/UnitUtils.java
+--- a/app/src/main/java/com/example/autoraidrpg/utils/UnitUtils.java	
++++ b/app/src/main/java/com/example/autoraidrpg/utils/UnitUtils.java	(date 1684592557242)
+@@ -68,7 +68,7 @@
+     }
+ 
+     public static void setSingleStats(Entity entity, RoleCollection roleCollection) {
+-        entity.setRoleCollectionID(roleCollection.getId());
++        entity.setRoleCollectionFirebaseID(roleCollection.getFirebaseID());
+         entity.setRoleID(roleCollection.getRoleID());
+         entity.setLevel(roleCollection.getLevel());
+         entity.setRating(roleCollection.getRating());
+Index: app/src/main/java/com/example/autoraidrpg/adapter/RoleCardAdapter.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/autoraidrpg/adapter/RoleCardAdapter.java b/app/src/main/java/com/example/autoraidrpg/adapter/RoleCardAdapter.java
+--- a/app/src/main/java/com/example/autoraidrpg/adapter/RoleCardAdapter.java	
++++ b/app/src/main/java/com/example/autoraidrpg/adapter/RoleCardAdapter.java	(date 1684588454834)
+@@ -68,7 +68,7 @@
+             Entity role = entities.get(position);
+ 
+             Intent intent = new Intent(v.getContext(), RoleDescriptionActivity.class);
+-            intent.putExtra("roleCollectionID", role.getRoleCollectionID());
++            intent.putExtra("roleCollectionFirebaseID", role.getRoleCollectionFirebaseID());
+             intent.putExtra("roleID", role.getRoleID());
+             intent.putExtra("name", role.getName());
+             intent.putExtra("roleDescription", role.getDescription());
+Index: app/src/main/java/com/example/autoraidrpg/database/dao/cloud/CloudDAO.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/autoraidrpg/database/dao/cloud/CloudDAO.java b/app/src/main/java/com/example/autoraidrpg/database/dao/cloud/CloudDAO.java
+--- a/app/src/main/java/com/example/autoraidrpg/database/dao/cloud/CloudDAO.java	
++++ b/app/src/main/java/com/example/autoraidrpg/database/dao/cloud/CloudDAO.java	(date 1684601301819)
+@@ -6,19 +6,17 @@
+ import com.google.firebase.database.DatabaseReference;
+ import com.google.firebase.database.FirebaseDatabase;
+ 
++import java.util.function.Consumer;
++
+ public abstract class CloudDAO {
+ 
+-    public static void init() {
+-        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
+-        FirebaseDatabase.getInstance("https://auto-raid-rpg-default-rtdb.asia-southeast1.firebasedatabase.app");
+-    }
+-
+     protected DatabaseReference databaseRef;
+     protected Context context;
+ 
+-    public CloudDAO(Context context) {
++    public CloudDAO(Context context, String collection_name) {
+         FirebaseApp.initializeApp(context);
+-        databaseRef = FirebaseDatabase.getInstance().getReference();
++        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
++        databaseRef = FirebaseDatabase.getInstance("https://auto-raid-rpg-default-rtdb.asia-southeast1.firebasedatabase.app").getReference(collection_name);
+         this.context = context;
+     }
+ 
+Index: app/src/main/java/com/example/autoraidrpg/database/dao/cloud/BagCloudDAO.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/autoraidrpg/database/dao/cloud/BagCloudDAO.java b/app/src/main/java/com/example/autoraidrpg/database/dao/cloud/BagCloudDAO.java
+--- a/app/src/main/java/com/example/autoraidrpg/database/dao/cloud/BagCloudDAO.java	
++++ b/app/src/main/java/com/example/autoraidrpg/database/dao/cloud/BagCloudDAO.java	(date 1684601576406)
+@@ -2,19 +2,96 @@
+ 
+ import android.content.Context;
+ 
++import androidx.annotation.NonNull;
++
++import com.example.autoraidrpg.database.dao.local.BagLocalDAO;
+ import com.example.autoraidrpg.model.Bag;
++import com.example.autoraidrpg.model.Position;
++import com.google.firebase.database.DataSnapshot;
++import com.google.firebase.database.DatabaseError;
+ import com.google.firebase.database.DatabaseReference;
++import com.google.firebase.database.Query;
++import com.google.firebase.database.ValueEventListener;
+ 
+ public class BagCloudDAO extends CloudDAO {
+ 
+     public BagCloudDAO(Context context) {
+-        super(context);
++        super(context, "bags");
+     }
+ 
+     public void store(Bag bag) {
+-        DatabaseReference newDatabaseRef = databaseRef.child("bags").push();
++        DatabaseReference newDatabaseRef = databaseRef.push();
+         newDatabaseRef.setValue(bag);
+         bag.setFirebaseID(newDatabaseRef.getKey());
+     }
+ 
++    public Bag retrieveByRoleCollectionID(String roleCollectionFirebaseID) {
++        Query query = databaseRef.orderByChild("roleCollectionFirebaseID").equalTo(roleCollectionFirebaseID).limitToFirst(1);
++        DataSnapshot dataSnapshot = query.get().getResult();
++        Bag bag = null;
++
++        if (dataSnapshot.exists()) {
++            DataSnapshot firstSnapshot = dataSnapshot.getChildren().iterator().next();
++            bag = firstSnapshot.getValue(Bag.class);
++        }
++
++        return bag;
++    }
++
++    public void put(String firebaseID, String inventoryFirebaseID, int index) {
++        Query query = databaseRef.orderByChild("firebaseID").equalTo(firebaseID);
++        query.addListenerForSingleValueEvent(new ValueEventListener() {
++            @Override
++            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
++                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
++                    // Retrieve the data
++                    String dataKey = snapshot.getKey();
++                    DatabaseReference dataRef = databaseRef.child(dataKey);
++
++                    switch(index) {
++                        case 0:
++                            dataRef.child("inventoryFirebaseID_A").setValue(inventoryFirebaseID);
++                            break;
++                        case 1:
++                            dataRef.child("inventoryFirebaseID_B").setValue(inventoryFirebaseID);
++                            break;
++                        case 2:
++                            dataRef.child("inventoryFirebaseID_C").setValue(inventoryFirebaseID);
++                            break;
++                        case 3:
++                            dataRef.child("inventoryFirebaseID_D").setValue(inventoryFirebaseID);
++                            break;
++                        case 4:
++                            dataRef.child("inventoryFirebaseID_E").setValue(inventoryFirebaseID);
++                            break;
++                        case 5:
++                            dataRef.child("inventoryFirebaseID_F").setValue(inventoryFirebaseID);
++                            break;
++                        case 6:
++                            dataRef.child("inventoryFirebaseID_G").setValue(inventoryFirebaseID);
++                            break;
++                        case 7:
++                            dataRef.child("inventoryFirebaseID_H").setValue(inventoryFirebaseID);
++                            break;
++                        case 8:
++                            dataRef.child("inventoryFirebaseID_I").setValue(inventoryFirebaseID);
++                            break;
++                        case 9:
++                            dataRef.child("inventoryFirebaseID_J").setValue(inventoryFirebaseID);
++                            break;
++                        case 10:
++                            dataRef.child("inventoryFirebaseID_K").setValue(inventoryFirebaseID);
++                            break;
++                        case 11:
++                            dataRef.child("inventoryFirebaseID_L").setValue(inventoryFirebaseID);
++                            break;
++                    }
++                }
++            }
++
++            @Override
++            public void onCancelled(@NonNull DatabaseError error) {}
++        });
++    }
++
+ }
+Index: app/src/main/java/com/example/autoraidrpg/database/dao/cloud/UserCloudDAO.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/autoraidrpg/database/dao/cloud/UserCloudDAO.java b/app/src/main/java/com/example/autoraidrpg/database/dao/cloud/UserCloudDAO.java
+--- a/app/src/main/java/com/example/autoraidrpg/database/dao/cloud/UserCloudDAO.java	
++++ b/app/src/main/java/com/example/autoraidrpg/database/dao/cloud/UserCloudDAO.java	(date 1684603084078)
+@@ -1,34 +1,90 @@
+ package com.example.autoraidrpg.database.dao.cloud;
+ 
+ import android.content.Context;
++import android.util.Log;
+ 
++import androidx.annotation.NonNull;
++
++import com.example.autoraidrpg.model.Stage;
+ import com.example.autoraidrpg.model.User;
++import com.google.android.gms.tasks.Task;
+ import com.google.firebase.database.DataSnapshot;
++import com.google.firebase.database.DatabaseError;
+ import com.google.firebase.database.DatabaseReference;
+ import com.google.firebase.database.Query;
++import com.google.firebase.database.ValueEventListener;
++
++import java.util.function.Consumer;
+ 
+ public class UserCloudDAO extends CloudDAO {
+ 
+     public UserCloudDAO(Context context) {
+-        super(context);
++        super(context, "users");
+     }
+ 
+     public void store(User user) {
+-        DatabaseReference newDatabaseRef = databaseRef.child("users").push();
++        DatabaseReference newDatabaseRef = databaseRef.push();
+         newDatabaseRef.setValue(user);
+         user.setFirebaseID(newDatabaseRef.getKey());
+     }
+ 
+-    public User retrieve(String firebaseID) {
+-        Query query = databaseRef.orderByChild("firebaseID").equalTo(firebaseID);
++    public void retrieve(String firebaseID, Consumer<User> next) {
++        Query query = databaseRef.child(firebaseID);
++        query.addListenerForSingleValueEvent(new ValueEventListener() {
++            @Override
++            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
++                if (dataSnapshot.exists()) {
++                    User user = (User) dataSnapshot.getValue(User.class);
++                    user.setFirebaseID(firebaseID);
++                    next.accept(user);
++                } else {
++                    Log.i("FIREBASE", "EMPTY");
++                }
++            }
++
++            @Override
++            public void onCancelled(@NonNull DatabaseError databaseError) {
++
++            }
++        });
++    }
++
++    public User retrieveByEmail(String email) {
++        Query query = databaseRef.orderByChild("email").equalTo(email);
+         DataSnapshot dataSnapshot = query.get().getResult();
+         User user = null;
+ 
+         for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+             user = snapshot.getValue(User.class);
++            Log.i("FIREBASE", user.toString());
+         }
+ 
+         return user;
+     }
+ 
++    public void put(String firebaseID, User user) {
++        Query query = databaseRef.child(firebaseID);
++        query.addListenerForSingleValueEvent(new ValueEventListener() {
++            @Override
++            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
++                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
++                    // Retrieve the data
++                    String dataKey = snapshot.getKey();
++                    DatabaseReference dataRef = databaseRef.child(dataKey);
++                    dataRef.child("username").setValue(user.getUsername());
++                    dataRef.child("email").setValue(user.getEmail());
++                    dataRef.child("password").setValue(user.getPassword());
++                    dataRef.child("longitude").setValue(user.getLongitude());
++                    dataRef.child("latitude").setValue(user.getLatitude());
++                    dataRef.child("coin").setValue(user.getCoin());
++                    dataRef.child("exp").setValue(user.getExp());
++                    dataRef.child("diamond").setValue(user.getDiamond());
++                }
++            }
++
++            @Override
++            public void onCancelled(@NonNull DatabaseError error) {}
++        });
++    }
++
+ }
+Index: app/src/main/java/com/example/autoraidrpg/database/dao/cloud/StageCloudDAO.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/autoraidrpg/database/dao/cloud/StageCloudDAO.java b/app/src/main/java/com/example/autoraidrpg/database/dao/cloud/StageCloudDAO.java
+--- a/app/src/main/java/com/example/autoraidrpg/database/dao/cloud/StageCloudDAO.java	
++++ b/app/src/main/java/com/example/autoraidrpg/database/dao/cloud/StageCloudDAO.java	(date 1684606260048)
+@@ -5,31 +5,57 @@
+ 
+ import androidx.annotation.NonNull;
+ 
++import com.example.autoraidrpg.model.Position;
+ import com.example.autoraidrpg.model.RoleCollection;
+ import com.example.autoraidrpg.model.Stage;
++import com.example.autoraidrpg.model.User;
+ import com.google.android.gms.tasks.OnFailureListener;
+ import com.google.android.gms.tasks.OnSuccessListener;
++import com.google.firebase.database.DataSnapshot;
++import com.google.firebase.database.DatabaseError;
++import com.google.firebase.database.DatabaseReference;
++import com.google.firebase.database.Query;
++import com.google.firebase.database.ValueEventListener;
+ 
+ public class StageCloudDAO extends CloudDAO {
+ 
+     public StageCloudDAO(Context context) {
+-        super(context);
++        super(context, "stages");
+     }
+ 
+     public void store(Stage stage) {
+-        databaseRef.child("stages").push().setValue(stage)
+-                .addOnSuccessListener(new OnSuccessListener<Void>() {
+-                    @Override
+-                    public void onSuccess(Void aVoid) {
+-                        // Toast.makeText(context, "Role collection data created successfully!", Toast.LENGTH_SHORT).show();
+-                    }
+-                })
+-                .addOnFailureListener(new OnFailureListener() {
+-                    @Override
+-                    public void onFailure(@NonNull Exception e) {
+-                        Toast.makeText(context, "Error creating data: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+-                    }
+-                });
++        DatabaseReference newDatabaseRef = databaseRef.push();
++        newDatabaseRef.setValue(stage);
++    }
++
++    public Stage retrieveByUserID(String userFirebaseID) {
++        Query query = databaseRef.orderByChild("userFirebaseID").equalTo(userFirebaseID);
++        DataSnapshot dataSnapshot = query.get().getResult();
++        Stage stage = null;
++
++        for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
++            stage = snapshot.getValue(Stage.class);
++        }
++
++        return stage;
++    }
++
++    public void put(String userFirebaseID, Stage stage) {
++        Query query = databaseRef.orderByChild("userFirebaseID").equalTo(userFirebaseID);
++        query.addListenerForSingleValueEvent(new ValueEventListener() {
++            @Override
++            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
++                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
++                    // Retrieve the data
++                    String dataKey = snapshot.getKey();
++                    DatabaseReference dataRef = databaseRef.child(dataKey);
++                    dataRef.child("value").setValue(stage.getValue());
++                }
++            }
++
++            @Override
++            public void onCancelled(@NonNull DatabaseError error) {}
++        });
+     }
+ 
+ }
+Index: app/src/main/java/com/example/autoraidrpg/database/dao/cloud/PositionCloudDAO.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/autoraidrpg/database/dao/cloud/PositionCloudDAO.java b/app/src/main/java/com/example/autoraidrpg/database/dao/cloud/PositionCloudDAO.java
+--- a/app/src/main/java/com/example/autoraidrpg/database/dao/cloud/PositionCloudDAO.java	
++++ b/app/src/main/java/com/example/autoraidrpg/database/dao/cloud/PositionCloudDAO.java	(date 1684606248975)
+@@ -1,20 +1,78 @@
+ package com.example.autoraidrpg.database.dao.cloud;
+ 
+ import android.content.Context;
++import android.util.Log;
+ 
++import androidx.annotation.NonNull;
++
++import com.example.autoraidrpg.model.Formation;
+ import com.example.autoraidrpg.model.Position;
++import com.google.firebase.database.DataSnapshot;
++import com.google.firebase.database.DatabaseError;
+ import com.google.firebase.database.DatabaseReference;
++import com.google.firebase.database.Query;
++import com.google.firebase.database.ValueEventListener;
++
++import java.util.function.Consumer;
+ 
+ public class PositionCloudDAO extends CloudDAO {
+ 
+     public PositionCloudDAO(Context context) {
+-        super(context);
++        super(context, "positions");
+     }
+ 
+     public void store(Position position) {
+-        DatabaseReference newDatabaseRef = databaseRef.child("positions").push();
++        DatabaseReference newDatabaseRef = databaseRef.push();
+         newDatabaseRef.setValue(position);
+         position.setFirebaseID(newDatabaseRef.getKey());
+     }
+ 
++    public void retrieve(String firebaseID, Consumer<Position> next) {
++        Query query = databaseRef.orderByChild("firebaseID").equalTo(firebaseID).limitToFirst(1);
++        query.addListenerForSingleValueEvent(new ValueEventListener() {
++            @Override
++            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
++                Position position = new Position();
++
++                if (dataSnapshot.exists()) {
++                    DataSnapshot firstSnapshot = dataSnapshot.getChildren().iterator().next();
++                    position = firstSnapshot.getValue(Position.class);
++                    position.setFirebaseID(firstSnapshot.getKey());
++                } else {
++                    // Handle the case where no data exists
++                    position.setIndex(-1);
++                    Log.i("FIREBASE", "No formation found");
++                }
++
++                next.accept(position);
++            }
++
++            @Override
++            public void onCancelled(@NonNull DatabaseError databaseError) {
++                // Handle any errors that occurred during the database operation
++            }
++        });
++    }
++
++    public void put(String firebaseID, Position position) {
++        Query query = databaseRef.orderByChild("firebaseID").equalTo(firebaseID);
++        query.addListenerForSingleValueEvent(new ValueEventListener() {
++            @Override
++            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
++                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
++                    // Retrieve the data
++                    String dataKey = snapshot.getKey();
++                    DatabaseReference dataRef = databaseRef.child(dataKey);
++                    dataRef.child("firebaseID").setValue(position.getFirebaseID());
++                    dataRef.child("roleCollectionFirebaseID").setValue(position.getRoleCollectionFirebaseID());
++                    dataRef.child("index").setValue(position.getIndex());
++                    dataRef.child("front").setValue(position.isFront());
++                }
++            }
++
++            @Override
++            public void onCancelled(@NonNull DatabaseError error) {}
++        });
++    }
++
+ }
+Index: app/src/main/java/com/example/autoraidrpg/database/dao/cloud/FormationCloudDAO.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/autoraidrpg/database/dao/cloud/FormationCloudDAO.java b/app/src/main/java/com/example/autoraidrpg/database/dao/cloud/FormationCloudDAO.java
+--- a/app/src/main/java/com/example/autoraidrpg/database/dao/cloud/FormationCloudDAO.java	
++++ b/app/src/main/java/com/example/autoraidrpg/database/dao/cloud/FormationCloudDAO.java	(date 1684603655415)
+@@ -1,21 +1,68 @@
+ package com.example.autoraidrpg.database.dao.cloud;
+ 
+ import android.content.Context;
++import android.util.Log;
++
++import androidx.annotation.NonNull;
+ 
+ import com.example.autoraidrpg.model.Formation;
++import com.example.autoraidrpg.model.Inventory;
+ import com.example.autoraidrpg.model.User;
++import com.google.firebase.database.DataSnapshot;
++import com.google.firebase.database.DatabaseError;
+ import com.google.firebase.database.DatabaseReference;
++import com.google.firebase.database.Query;
++import com.google.firebase.database.ValueEventListener;
++
++import java.util.ArrayList;
++import java.util.List;
++import java.util.function.Consumer;
+ 
+ public class FormationCloudDAO extends CloudDAO {
+ 
+     public FormationCloudDAO(Context context) {
+-        super(context);
++        super(context, "formations");
+     }
+ 
+     public void store(Formation formation) {
+-        DatabaseReference newDatabaseRef = databaseRef.child("formations").push();
++        DatabaseReference newDatabaseRef = databaseRef.push();
+         newDatabaseRef.setValue(formation);
+         formation.setFirebaseID(newDatabaseRef.getKey());
+     }
+ 
++    public void retrieveByUserID(String userFirebaseID, Consumer<Formation> next) {
++        Query query = databaseRef.orderByChild("userFirebaseID").equalTo(userFirebaseID).limitToFirst(1);
++        query.addListenerForSingleValueEvent(new ValueEventListener() {
++            @Override
++            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
++                if (dataSnapshot.exists()) {
++                    DataSnapshot firstSnapshot = dataSnapshot.getChildren().iterator().next();
++                    Formation formation = firstSnapshot.getValue(Formation.class);
++                    formation.setFirebaseID(firstSnapshot.getKey());
++                    next.accept(formation);
++                } else {
++                    // Handle the case where no data exists
++                    Log.i("FIREBASE", "No formation found");
++                }
++            }
++
++            @Override
++            public void onCancelled(@NonNull DatabaseError databaseError) {
++                // Handle any errors that occurred during the database operation
++            }
++        });
++    }
++
++    public List<Formation> retrieveAll(String userFirebaseID) {
++        Query query = databaseRef.orderByChild("userFirebaseID").equalTo(userFirebaseID);
++        DataSnapshot dataSnapshot = query.get().getResult();
++        List<Formation> formations = new ArrayList<>();
++
++        for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
++            formations.add(snapshot.getValue(Formation.class));
++        }
++
++        return formations;
++    }
++
+ }
+Index: app/src/main/java/com/example/autoraidrpg/database/dao/cloud/InventoryCloudDAO.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/autoraidrpg/database/dao/cloud/InventoryCloudDAO.java b/app/src/main/java/com/example/autoraidrpg/database/dao/cloud/InventoryCloudDAO.java
+--- a/app/src/main/java/com/example/autoraidrpg/database/dao/cloud/InventoryCloudDAO.java	
++++ b/app/src/main/java/com/example/autoraidrpg/database/dao/cloud/InventoryCloudDAO.java	(date 1684601540477)
+@@ -3,18 +3,51 @@
+ import android.content.Context;
+ 
+ import com.example.autoraidrpg.model.Inventory;
++import com.example.autoraidrpg.model.Position;
++import com.example.autoraidrpg.model.User;
++import com.google.firebase.database.DataSnapshot;
+ import com.google.firebase.database.DatabaseReference;
++import com.google.firebase.database.Query;
++
++import java.util.ArrayList;
++import java.util.List;
+ 
+ public class InventoryCloudDAO extends CloudDAO {
+ 
++
+     public InventoryCloudDAO(Context context) {
+-        super(context);
++        super(context, "inventories");
+     }
+ 
+     public void store(Inventory inventory) {
+-        DatabaseReference newDatabaseRef = databaseRef.child("inventories").push();
++        DatabaseReference newDatabaseRef = databaseRef.push();
+         newDatabaseRef.setValue(inventory);
+         inventory.setFirebaseID(newDatabaseRef.getKey());
+     }
+ 
++    public Inventory retrieve(String firebaseID) {
++        Query query = databaseRef.orderByChild("firebaseID").equalTo(firebaseID).limitToFirst(1);
++        DataSnapshot dataSnapshot = query.get().getResult();
++        Inventory inventory = null;
++
++        if (dataSnapshot.exists()) {
++            DataSnapshot firstSnapshot = dataSnapshot.getChildren().iterator().next();
++            inventory = firstSnapshot.getValue(Inventory.class);
++        }
++
++        return inventory;
++    }
++
++    public List<Inventory> retrieveAll(String userFirebaseID) {
++        Query query = databaseRef.orderByChild("userFirebaseID").equalTo(userFirebaseID);
++        DataSnapshot dataSnapshot = query.get().getResult();
++        List<Inventory> inventories = new ArrayList<>();
++
++        for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
++            inventories.add(snapshot.getValue(Inventory.class));
++        }
++
++        return inventories;
++    }
++
+ }
+Index: app/src/main/java/com/example/autoraidrpg/database/dao/cloud/RoleCollectionCloudDAO.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/autoraidrpg/database/dao/cloud/RoleCollectionCloudDAO.java b/app/src/main/java/com/example/autoraidrpg/database/dao/cloud/RoleCollectionCloudDAO.java
+--- a/app/src/main/java/com/example/autoraidrpg/database/dao/cloud/RoleCollectionCloudDAO.java	
++++ b/app/src/main/java/com/example/autoraidrpg/database/dao/cloud/RoleCollectionCloudDAO.java	(date 1684606255927)
+@@ -1,26 +1,51 @@
+ package com.example.autoraidrpg.database.dao.cloud;
+ 
+ import android.content.Context;
+-import android.widget.Toast;
+ 
+-import androidx.annotation.NonNull;
+-
++import com.example.autoraidrpg.model.Inventory;
+ import com.example.autoraidrpg.model.RoleCollection;
+-import com.example.autoraidrpg.model.User;
+-import com.google.android.gms.tasks.OnFailureListener;
+-import com.google.android.gms.tasks.OnSuccessListener;
++import com.google.firebase.database.DataSnapshot;
+ import com.google.firebase.database.DatabaseReference;
++import com.google.firebase.database.Query;
++
++import java.util.ArrayList;
++import java.util.List;
+ 
+ public class RoleCollectionCloudDAO extends CloudDAO {
+ 
+     public RoleCollectionCloudDAO(Context context) {
+-        super(context);
++        super(context, "roleCollections");
+     }
+ 
+     public void store(RoleCollection roleCollection) {
+-        DatabaseReference newDatabaseRef = databaseRef.child("roleCollections").push();
++        DatabaseReference newDatabaseRef = databaseRef.push();
+         newDatabaseRef.setValue(roleCollection);
+         roleCollection.setFirebaseID(newDatabaseRef.getKey());
+     }
+ 
++    public RoleCollection retrieve(String firebaseID) {
++        Query query = databaseRef.orderByChild("firebaseID").equalTo(firebaseID).limitToFirst(1);
++        DataSnapshot dataSnapshot = query.get().getResult();
++        RoleCollection roleCollection = null;
++
++        if (dataSnapshot.exists()) {
++            DataSnapshot firstSnapshot = dataSnapshot.getChildren().iterator().next();
++            roleCollection = firstSnapshot.getValue(RoleCollection.class);
++        }
++
++        return roleCollection;
++    }
++
++    public List<RoleCollection> retrieveAll(String userFirebaseID) {
++        Query query = databaseRef.orderByChild("userFirebaseID").equalTo(userFirebaseID);
++        DataSnapshot dataSnapshot = query.get().getResult();
++        List<RoleCollection> roleCollections = new ArrayList<>();
++
++        for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
++            roleCollections.add(snapshot.getValue(RoleCollection.class));
++        }
++
++        return roleCollections;
++    }
++
+ }
+Index: app/src/main/java/com/example/autoraidrpg/database/dao/local/BagLocalDAO.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/autoraidrpg/database/dao/local/BagLocalDAO.java b/app/src/main/java/com/example/autoraidrpg/database/dao/local/BagLocalDAO.java
+--- a/app/src/main/java/com/example/autoraidrpg/database/dao/local/BagLocalDAO.java	
++++ b/app/src/main/java/com/example/autoraidrpg/database/dao/local/BagLocalDAO.java	(date 1684590989930)
+@@ -10,52 +10,52 @@
+ public class BagLocalDAO {
+ 
+     public static final String TABLE = "bags";
+-    public static final String ID = "id";
+-    public static final String USER_ID = "userID";
+-    public static final String ROLE_COLLECTION_ID = "roleCollectionID";
+-    public static final String INVENTORY_ID_A = "inventoryID_A";
+-    public static final String INVENTORY_ID_B = "inventoryID_B";
+-    public static final String INVENTORY_ID_C = "inventoryID_C";
+-    public static final String INVENTORY_ID_D = "inventoryID_D";
+-    public static final String INVENTORY_ID_E = "inventoryID_E";
+-    public static final String INVENTORY_ID_F = "inventoryID_F";
+-    public static final String INVENTORY_ID_G = "inventoryID_G";
+-    public static final String INVENTORY_ID_H = "inventoryID_H";
+-    public static final String INVENTORY_ID_I = "inventoryID_I";
+-    public static final String INVENTORY_ID_J = "inventoryID_J";
+-    public static final String INVENTORY_ID_K = "inventoryID_K";
+-    public static final String INVENTORY_ID_L = "inventoryID_L";
++    public static final String FIREBASE_ID = "firebaseID";
++    public static final String USER_FIREBASE_ID = "userFirebaseID";
++    public static final String ROLE_COLLECTION_FIREBASE_ID = "roleCollectionFirebaseID";
++    public static final String INVENTORY_FIREBASE_ID_A = "inventoryFirebaseID_A";
++    public static final String INVENTORY_FIREBASE_ID_B = "inventoryFirebaseID_B";
++    public static final String INVENTORY_FIREBASE_ID_C = "inventoryFirebaseID_C";
++    public static final String INVENTORY_FIREBASE_ID_D = "inventoryFirebaseID_D";
++    public static final String INVENTORY_FIREBASE_ID_E = "inventoryFirebaseID_E";
++    public static final String INVENTORY_FIREBASE_ID_F = "inventoryFirebaseID_F";
++    public static final String INVENTORY_FIREBASE_ID_G = "inventoryFirebaseID_G";
++    public static final String INVENTORY_FIREBASE_ID_H = "inventoryFirebaseID_H";
++    public static final String INVENTORY_FIREBASE_ID_I = "inventoryFirebaseID_I";
++    public static final String INVENTORY_FIREBASE_ID_J = "inventoryFirebaseID_J";
++    public static final String INVENTORY_FIREBASE_ID_K = "inventoryFirebaseID_K";
++    public static final String INVENTORY_FIREBASE_ID_L = "inventoryFirebaseID_L";
+ 
+     public static String getTable() {
+-        return "CREATE TABLE " + TABLE + "(" + ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+-                USER_ID + " INTEGER, " +
+-                ROLE_COLLECTION_ID + " INTEGER, " +
+-                INVENTORY_ID_A + " INTEGER, " +
+-                INVENTORY_ID_B + " INTEGER, " +
+-                INVENTORY_ID_C + " INTEGER, " +
+-                INVENTORY_ID_D + " INTEGER, " +
+-                INVENTORY_ID_E + " INTEGER, " +
+-                INVENTORY_ID_F + " INTEGER, " +
+-                INVENTORY_ID_G + " INTEGER, " +
+-                INVENTORY_ID_H + " INTEGER, " +
+-                INVENTORY_ID_I + " INTEGER, " +
+-                INVENTORY_ID_J + " INTEGER, " +
+-                INVENTORY_ID_K + " INTEGER, " +
+-                INVENTORY_ID_L + " INTEGER, " +
+-                "FOREIGN KEY (" + USER_ID +  ") REFERENCES " + UserLocalDAO.TABLE + " (" + UserLocalDAO.ID + ") ON DELETE CASCADE," +
+-                "FOREIGN KEY (" + ROLE_COLLECTION_ID +  ") REFERENCES " + RoleCollectionLocalDAO.TABLE + " (" + RoleCollectionLocalDAO.ID + ") ON DELETE CASCADE," +
+-                "FOREIGN KEY (" + INVENTORY_ID_A +  ") REFERENCES " + InventoryLocalDAO.TABLE + " (" + InventoryLocalDAO.ID + ") ON DELETE SET NULL," +
+-                "FOREIGN KEY (" + INVENTORY_ID_B +  ") REFERENCES " + InventoryLocalDAO.TABLE + " (" + InventoryLocalDAO.ID + ") ON DELETE SET NULL," +
+-                "FOREIGN KEY (" + INVENTORY_ID_C +  ") REFERENCES " + InventoryLocalDAO.TABLE + " (" + InventoryLocalDAO.ID + ") ON DELETE SET NULL," +
+-                "FOREIGN KEY (" + INVENTORY_ID_D +  ") REFERENCES " + InventoryLocalDAO.TABLE + " (" + InventoryLocalDAO.ID + ") ON DELETE SET NULL," +
+-                "FOREIGN KEY (" + INVENTORY_ID_E +  ") REFERENCES " + InventoryLocalDAO.TABLE + " (" + InventoryLocalDAO.ID + ") ON DELETE SET NULL," +
+-                "FOREIGN KEY (" + INVENTORY_ID_F +  ") REFERENCES " + InventoryLocalDAO.TABLE + " (" + InventoryLocalDAO.ID + ") ON DELETE SET NULL," +
+-                "FOREIGN KEY (" + INVENTORY_ID_G +  ") REFERENCES " + InventoryLocalDAO.TABLE + " (" + InventoryLocalDAO.ID + ") ON DELETE SET NULL," +
+-                "FOREIGN KEY (" + INVENTORY_ID_H +  ") REFERENCES " + InventoryLocalDAO.TABLE + " (" + InventoryLocalDAO.ID + ") ON DELETE SET NULL," +
+-                "FOREIGN KEY (" + INVENTORY_ID_I +  ") REFERENCES " + InventoryLocalDAO.TABLE + " (" + InventoryLocalDAO.ID + ") ON DELETE SET NULL," +
+-                "FOREIGN KEY (" + INVENTORY_ID_J +  ") REFERENCES " + InventoryLocalDAO.TABLE + " (" + InventoryLocalDAO.ID + ") ON DELETE SET NULL," +
+-                "FOREIGN KEY (" + INVENTORY_ID_K +  ") REFERENCES " + InventoryLocalDAO.TABLE + " (" + InventoryLocalDAO.ID + ") ON DELETE SET NULL," +
+-                "FOREIGN KEY (" + INVENTORY_ID_L +  ") REFERENCES " + InventoryLocalDAO.TABLE + " (" + InventoryLocalDAO.ID + ") ON DELETE SET NULL)";
++        return "CREATE TABLE " + TABLE + "(" + FIREBASE_ID + " TEXT NOT NULL DEFAULT 'NONE', " +
++                USER_FIREBASE_ID + " TEXT NOT NULL DEFAULT 'NONE', " +
++                ROLE_COLLECTION_FIREBASE_ID + " TEXT NOT NULL DEFAULT 'NONE', " +
++                INVENTORY_FIREBASE_ID_A + " TEXT NOT NULL DEFAULT 'NONE', " +
++                INVENTORY_FIREBASE_ID_B + " TEXT NOT NULL DEFAULT 'NONE', " +
++                INVENTORY_FIREBASE_ID_C + " TEXT NOT NULL DEFAULT 'NONE', " +
++                INVENTORY_FIREBASE_ID_D + " TEXT NOT NULL DEFAULT 'NONE', " +
++                INVENTORY_FIREBASE_ID_E + " TEXT NOT NULL DEFAULT 'NONE', " +
++                INVENTORY_FIREBASE_ID_F + " TEXT NOT NULL DEFAULT 'NONE', " +
++                INVENTORY_FIREBASE_ID_G + " TEXT NOT NULL DEFAULT 'NONE', " +
++                INVENTORY_FIREBASE_ID_H + " TEXT NOT NULL DEFAULT 'NONE', " +
++                INVENTORY_FIREBASE_ID_I + " TEXT NOT NULL DEFAULT 'NONE', " +
++                INVENTORY_FIREBASE_ID_J + " TEXT NOT NULL DEFAULT 'NONE', " +
++                INVENTORY_FIREBASE_ID_K + " TEXT NOT NULL DEFAULT 'NONE', " +
++                INVENTORY_FIREBASE_ID_L + " TEXT NOT NULL DEFAULT 'NONE', " +
++                "FOREIGN KEY (" + USER_FIREBASE_ID +  ") REFERENCES " + UserLocalDAO.TABLE + " (" + UserLocalDAO.FIREBASE_ID + ") ON DELETE CASCADE," +
++                "FOREIGN KEY (" + ROLE_COLLECTION_FIREBASE_ID +  ") REFERENCES " + RoleCollectionLocalDAO.TABLE + " (" + RoleCollectionLocalDAO.FIREBASE_ID + ") ON DELETE CASCADE," +
++                "FOREIGN KEY (" + INVENTORY_FIREBASE_ID_A +  ") REFERENCES " + InventoryLocalDAO.TABLE + " (" + InventoryLocalDAO.FIREBASE_ID + ") ON DELETE SET NULL," +
++                "FOREIGN KEY (" + INVENTORY_FIREBASE_ID_B +  ") REFERENCES " + InventoryLocalDAO.TABLE + " (" + InventoryLocalDAO.FIREBASE_ID + ") ON DELETE SET NULL," +
++                "FOREIGN KEY (" + INVENTORY_FIREBASE_ID_C +  ") REFERENCES " + InventoryLocalDAO.TABLE + " (" + InventoryLocalDAO.FIREBASE_ID + ") ON DELETE SET NULL," +
++                "FOREIGN KEY (" + INVENTORY_FIREBASE_ID_D +  ") REFERENCES " + InventoryLocalDAO.TABLE + " (" + InventoryLocalDAO.FIREBASE_ID + ") ON DELETE SET NULL," +
++                "FOREIGN KEY (" + INVENTORY_FIREBASE_ID_E +  ") REFERENCES " + InventoryLocalDAO.TABLE + " (" + InventoryLocalDAO.FIREBASE_ID + ") ON DELETE SET NULL," +
++                "FOREIGN KEY (" + INVENTORY_FIREBASE_ID_F +  ") REFERENCES " + InventoryLocalDAO.TABLE + " (" + InventoryLocalDAO.FIREBASE_ID + ") ON DELETE SET NULL," +
++                "FOREIGN KEY (" + INVENTORY_FIREBASE_ID_G +  ") REFERENCES " + InventoryLocalDAO.TABLE + " (" + InventoryLocalDAO.FIREBASE_ID + ") ON DELETE SET NULL," +
++                "FOREIGN KEY (" + INVENTORY_FIREBASE_ID_H +  ") REFERENCES " + InventoryLocalDAO.TABLE + " (" + InventoryLocalDAO.FIREBASE_ID + ") ON DELETE SET NULL," +
++                "FOREIGN KEY (" + INVENTORY_FIREBASE_ID_I +  ") REFERENCES " + InventoryLocalDAO.TABLE + " (" + InventoryLocalDAO.FIREBASE_ID + ") ON DELETE SET NULL," +
++                "FOREIGN KEY (" + INVENTORY_FIREBASE_ID_J +  ") REFERENCES " + InventoryLocalDAO.TABLE + " (" + InventoryLocalDAO.FIREBASE_ID + ") ON DELETE SET NULL," +
++                "FOREIGN KEY (" + INVENTORY_FIREBASE_ID_K +  ") REFERENCES " + InventoryLocalDAO.TABLE + " (" + InventoryLocalDAO.FIREBASE_ID + ") ON DELETE SET NULL," +
++                "FOREIGN KEY (" + INVENTORY_FIREBASE_ID_L +  ") REFERENCES " + InventoryLocalDAO.TABLE + " (" + InventoryLocalDAO.FIREBASE_ID + ") ON DELETE SET NULL)";
+     }
+ 
+     // create
+@@ -63,51 +63,51 @@
+         SQLiteDatabase db = dbHelper.getWritableDatabase();
+         ContentValues cv = new ContentValues();
+ 
+-        cv.put(BagLocalDAO.USER_ID, bag.getUserID());
+-        cv.put(BagLocalDAO.ROLE_COLLECTION_ID, bag.getRoleCollectionID());
+-        cv.put(BagLocalDAO.INVENTORY_ID_A, bag.getInventoryID_A());
+-        cv.put(BagLocalDAO.INVENTORY_ID_B, bag.getInventoryID_B());
+-        cv.put(BagLocalDAO.INVENTORY_ID_C, bag.getInventoryID_C());
+-        cv.put(BagLocalDAO.INVENTORY_ID_D, bag.getInventoryID_D());
+-        cv.put(BagLocalDAO.INVENTORY_ID_E, bag.getInventoryID_E());
+-        cv.put(BagLocalDAO.INVENTORY_ID_F, bag.getInventoryID_F());
+-        cv.put(BagLocalDAO.INVENTORY_ID_G, bag.getInventoryID_G());
+-        cv.put(BagLocalDAO.INVENTORY_ID_H, bag.getInventoryID_H());
+-        cv.put(BagLocalDAO.INVENTORY_ID_I, bag.getInventoryID_I());
+-        cv.put(BagLocalDAO.INVENTORY_ID_J, bag.getInventoryID_J());
+-        cv.put(BagLocalDAO.INVENTORY_ID_K, bag.getInventoryID_K());
+-        cv.put(BagLocalDAO.INVENTORY_ID_L, bag.getInventoryID_L());
++        cv.put(BagLocalDAO.USER_FIREBASE_ID, bag.getUserFirebaseID());
++        cv.put(BagLocalDAO.ROLE_COLLECTION_FIREBASE_ID, bag.getRoleCollectionFirebaseID());
++        cv.put(BagLocalDAO.INVENTORY_FIREBASE_ID_A, bag.getInventoryFirebaseID_A());
++        cv.put(BagLocalDAO.INVENTORY_FIREBASE_ID_B, bag.getInventoryFirebaseID_B());
++        cv.put(BagLocalDAO.INVENTORY_FIREBASE_ID_C, bag.getInventoryFirebaseID_C());
++        cv.put(BagLocalDAO.INVENTORY_FIREBASE_ID_D, bag.getInventoryFirebaseID_D());
++        cv.put(BagLocalDAO.INVENTORY_FIREBASE_ID_E, bag.getInventoryFirebaseID_E());
++        cv.put(BagLocalDAO.INVENTORY_FIREBASE_ID_F, bag.getInventoryFirebaseID_F());
++        cv.put(BagLocalDAO.INVENTORY_FIREBASE_ID_G, bag.getInventoryFirebaseID_G());
++        cv.put(BagLocalDAO.INVENTORY_FIREBASE_ID_H, bag.getInventoryFirebaseID_H());
++        cv.put(BagLocalDAO.INVENTORY_FIREBASE_ID_I, bag.getInventoryFirebaseID_I());
++        cv.put(BagLocalDAO.INVENTORY_FIREBASE_ID_J, bag.getInventoryFirebaseID_J());
++        cv.put(BagLocalDAO.INVENTORY_FIREBASE_ID_K, bag.getInventoryFirebaseID_K());
++        cv.put(BagLocalDAO.INVENTORY_FIREBASE_ID_L, bag.getInventoryFirebaseID_L());
+ 
+         return db.insert(BagLocalDAO.TABLE, null, cv);
+     }
+ 
+     // read
+-    public static Bag retrieve(SQLiteOpenHelper dbHelper, int roleCollectionID) {
++    public static Bag retrieve(SQLiteOpenHelper dbHelper, String roleCollectionFirebaseID) {
+         SQLiteDatabase db = dbHelper.getReadableDatabase();
+         Bag bag = null;
+ 
+         String[] projection = { "*" };
+-        String selection = "roleCollectionID = ?";
+-        String[] selectionArgs = { String.valueOf(roleCollectionID) };
++        String selection = "roleCollectionFirebaseID = ?";
++        String[] selectionArgs = { roleCollectionFirebaseID };
+         Cursor cursor = db.query(BagLocalDAO.TABLE, projection, selection, selectionArgs, null, null, null);
+ 
+         if(cursor.moveToNext()) {
+             bag = new Bag(
+-                    cursor.getInt(cursor.getColumnIndexOrThrow(BagLocalDAO.ID)),
+-                    cursor.getInt(cursor.getColumnIndexOrThrow(BagLocalDAO.USER_ID)),
+-                    cursor.getInt(cursor.getColumnIndexOrThrow(BagLocalDAO.ROLE_COLLECTION_ID)),
+-                    cursor.getInt(cursor.getColumnIndexOrThrow(BagLocalDAO.INVENTORY_ID_A)),
+-                    cursor.getInt(cursor.getColumnIndexOrThrow(BagLocalDAO.INVENTORY_ID_B)),
+-                    cursor.getInt(cursor.getColumnIndexOrThrow(BagLocalDAO.INVENTORY_ID_C)),
+-                    cursor.getInt(cursor.getColumnIndexOrThrow(BagLocalDAO.INVENTORY_ID_D)),
+-                    cursor.getInt(cursor.getColumnIndexOrThrow(BagLocalDAO.INVENTORY_ID_E)),
+-                    cursor.getInt(cursor.getColumnIndexOrThrow(BagLocalDAO.INVENTORY_ID_F)),
+-                    cursor.getInt(cursor.getColumnIndexOrThrow(BagLocalDAO.INVENTORY_ID_G)),
+-                    cursor.getInt(cursor.getColumnIndexOrThrow(BagLocalDAO.INVENTORY_ID_H)),
+-                    cursor.getInt(cursor.getColumnIndexOrThrow(BagLocalDAO.INVENTORY_ID_I)),
+-                    cursor.getInt(cursor.getColumnIndexOrThrow(BagLocalDAO.INVENTORY_ID_J)),
+-                    cursor.getInt(cursor.getColumnIndexOrThrow(BagLocalDAO.INVENTORY_ID_K)),
+-                    cursor.getInt(cursor.getColumnIndexOrThrow(BagLocalDAO.INVENTORY_ID_L))
++                    cursor.getString(cursor.getColumnIndexOrThrow(BagLocalDAO.FIREBASE_ID)),
++                    cursor.getString(cursor.getColumnIndexOrThrow(BagLocalDAO.USER_FIREBASE_ID)),
++                    cursor.getString(cursor.getColumnIndexOrThrow(BagLocalDAO.ROLE_COLLECTION_FIREBASE_ID)),
++                    cursor.getString(cursor.getColumnIndexOrThrow(BagLocalDAO.INVENTORY_FIREBASE_ID_A)),
++                    cursor.getString(cursor.getColumnIndexOrThrow(BagLocalDAO.INVENTORY_FIREBASE_ID_B)),
++                    cursor.getString(cursor.getColumnIndexOrThrow(BagLocalDAO.INVENTORY_FIREBASE_ID_C)),
++                    cursor.getString(cursor.getColumnIndexOrThrow(BagLocalDAO.INVENTORY_FIREBASE_ID_D)),
++                    cursor.getString(cursor.getColumnIndexOrThrow(BagLocalDAO.INVENTORY_FIREBASE_ID_E)),
++                    cursor.getString(cursor.getColumnIndexOrThrow(BagLocalDAO.INVENTORY_FIREBASE_ID_F)),
++                    cursor.getString(cursor.getColumnIndexOrThrow(BagLocalDAO.INVENTORY_FIREBASE_ID_G)),
++                    cursor.getString(cursor.getColumnIndexOrThrow(BagLocalDAO.INVENTORY_FIREBASE_ID_H)),
++                    cursor.getString(cursor.getColumnIndexOrThrow(BagLocalDAO.INVENTORY_FIREBASE_ID_I)),
++                    cursor.getString(cursor.getColumnIndexOrThrow(BagLocalDAO.INVENTORY_FIREBASE_ID_J)),
++                    cursor.getString(cursor.getColumnIndexOrThrow(BagLocalDAO.INVENTORY_FIREBASE_ID_K)),
++                    cursor.getString(cursor.getColumnIndexOrThrow(BagLocalDAO.INVENTORY_FIREBASE_ID_L))
+             );
+         }
+ 
+@@ -118,17 +118,17 @@
+     }
+ 
+     // check if an item is equipped
+-    public static boolean isEquipped(SQLiteOpenHelper dbHelper, int userID, int inventoryID) {
++    public static boolean isEquipped(SQLiteOpenHelper dbHelper, String userFirebaseID, String inventoryFirebaseID) {
+         SQLiteDatabase db = dbHelper.getReadableDatabase();
+ 
+         String[] projection = { "*" };
+-        String selection = "userID = ? AND (inventoryID_A = ? OR inventoryID_B = ? OR inventoryID_C = ? OR inventoryID_D = ? OR inventoryID_E = ? OR inventoryID_F = ? OR inventoryID_G = ? OR inventoryID_H = ? OR inventoryID_I = ? OR inventoryID_J = ? OR inventoryID_K = ? OR inventoryID_L = ?)";
++        String selection = "userFirebaseID = ? AND (inventoryFirebaseID_A = ? OR inventoryFirebaseID_B = ? OR inventoryFirebaseID_C = ? OR inventoryFirebaseID_D = ? OR inventoryFirebaseID_E = ? OR inventoryFirebaseID_F = ? OR inventoryFirebaseID_G = ? OR inventoryFirebaseID_H = ? OR inventoryFirebaseID_I = ? OR inventoryFirebaseID_J = ? OR inventoryFirebaseID_K = ? OR inventoryFirebaseID_L = ?)";
+         String[] selectionArgs = {
+-                String.valueOf(userID),
+-                String.valueOf(inventoryID), String.valueOf(inventoryID), String.valueOf(inventoryID),
+-                String.valueOf(inventoryID), String.valueOf(inventoryID), String.valueOf(inventoryID),
+-                String.valueOf(inventoryID), String.valueOf(inventoryID), String.valueOf(inventoryID),
+-                String.valueOf(inventoryID), String.valueOf(inventoryID), String.valueOf(inventoryID)
++                userFirebaseID,
++                inventoryFirebaseID, inventoryFirebaseID, inventoryFirebaseID,
++                inventoryFirebaseID, inventoryFirebaseID, inventoryFirebaseID,
++                inventoryFirebaseID, inventoryFirebaseID, inventoryFirebaseID,
++                inventoryFirebaseID, inventoryFirebaseID, inventoryFirebaseID
+         };
+         Cursor cursor = db.query(BagLocalDAO.TABLE, projection, selection, selectionArgs, null, null, null);
+         boolean exist = cursor.moveToNext();
+@@ -140,48 +140,48 @@
+     }
+ 
+     // put specific inventory id in the bag
+-    public static long put(SQLiteOpenHelper dbHelper, int bagID, int inventoryID, int index) {
++    public static long put(SQLiteOpenHelper dbHelper, String firebaseID, String inventoryFirebaseID, int index) {
+         SQLiteDatabase db = dbHelper.getWritableDatabase();
+         ContentValues cv = new ContentValues();
+-        String selection = "id = ?";
+-        String[] selectionArgs = { String.valueOf(bagID) };
++        String selection = "firebaseID = ?";
++        String[] selectionArgs = { firebaseID };
+ 
+         switch(index) {
+             case 0:
+-                cv.put(BagLocalDAO.INVENTORY_ID_A, inventoryID);
++                cv.put(BagLocalDAO.INVENTORY_FIREBASE_ID_A, inventoryFirebaseID);
+                 break;
+             case 1:
+-                cv.put(BagLocalDAO.INVENTORY_ID_B, inventoryID);
++                cv.put(BagLocalDAO.INVENTORY_FIREBASE_ID_B, inventoryFirebaseID);
+                 break;
+             case 2:
+-                cv.put(BagLocalDAO.INVENTORY_ID_C, inventoryID);
++                cv.put(BagLocalDAO.INVENTORY_FIREBASE_ID_C, inventoryFirebaseID);
+                 break;
+             case 3:
+-                cv.put(BagLocalDAO.INVENTORY_ID_D, inventoryID);
++                cv.put(BagLocalDAO.INVENTORY_FIREBASE_ID_D, inventoryFirebaseID);
+                 break;
+             case 4:
+-                cv.put(BagLocalDAO.INVENTORY_ID_E, inventoryID);
++                cv.put(BagLocalDAO.INVENTORY_FIREBASE_ID_E, inventoryFirebaseID);
+                 break;
+             case 5:
+-                cv.put(BagLocalDAO.INVENTORY_ID_F, inventoryID);
++                cv.put(BagLocalDAO.INVENTORY_FIREBASE_ID_F, inventoryFirebaseID);
+                 break;
+             case 6:
+-                cv.put(BagLocalDAO.INVENTORY_ID_G, inventoryID);
++                cv.put(BagLocalDAO.INVENTORY_FIREBASE_ID_G, inventoryFirebaseID);
+                 break;
+             case 7:
+-                cv.put(BagLocalDAO.INVENTORY_ID_H, inventoryID);
++                cv.put(BagLocalDAO.INVENTORY_FIREBASE_ID_H, inventoryFirebaseID);
+                 break;
+             case 8:
+-                cv.put(BagLocalDAO.INVENTORY_ID_I, inventoryID);
++                cv.put(BagLocalDAO.INVENTORY_FIREBASE_ID_I, inventoryFirebaseID);
+                 break;
+             case 9:
+-                cv.put(BagLocalDAO.INVENTORY_ID_J, inventoryID);
++                cv.put(BagLocalDAO.INVENTORY_FIREBASE_ID_J, inventoryFirebaseID);
+                 break;
+             case 10:
+-                cv.put(BagLocalDAO.INVENTORY_ID_K, inventoryID);
++                cv.put(BagLocalDAO.INVENTORY_FIREBASE_ID_K, inventoryFirebaseID);
+                 break;
+             case 11:
+-                cv.put(BagLocalDAO.INVENTORY_ID_L, inventoryID);
++                cv.put(BagLocalDAO.INVENTORY_FIREBASE_ID_L, inventoryFirebaseID);
+                 break;
+         }
+ 
+Index: app/src/main/java/com/example/autoraidrpg/database/dao/local/UserLocalDAO.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/autoraidrpg/database/dao/local/UserLocalDAO.java b/app/src/main/java/com/example/autoraidrpg/database/dao/local/UserLocalDAO.java
+--- a/app/src/main/java/com/example/autoraidrpg/database/dao/local/UserLocalDAO.java	
++++ b/app/src/main/java/com/example/autoraidrpg/database/dao/local/UserLocalDAO.java	(date 1684589440011)
+@@ -114,13 +114,13 @@
+     }
+ 
+     // read by id
+-    public static User retrieveByID(SQLiteOpenHelper dbHelper, int id) {
++    public static User retrieveByID(SQLiteOpenHelper dbHelper, String firebaseID) {
+         SQLiteDatabase db = dbHelper.getReadableDatabase();
+         User user = null;
+ 
+         String[] projection = { "*" };
+-        String selection = "id = ?";
+-        String[] selectionArgs = { String.valueOf(id) };
++        String selection = "firebaseID = ?";
++        String[] selectionArgs = { firebaseID };
+         Cursor cursor = db.query(UserLocalDAO.TABLE, projection, selection, selectionArgs, null, null, null);
+ 
+         while(cursor.moveToNext()) {
+@@ -158,7 +158,7 @@
+         cv.put(UserLocalDAO.DIAMOND, user.getDiamond());
+ 
+         String selection = "firebaseID = ?";
+-        String[] selectionArgs = { String.valueOf(user.getFirebaseID()) };
++        String[] selectionArgs = { user.getFirebaseID() };
+ 
+         db.update(UserLocalDAO.TABLE, cv, selection, selectionArgs);
+         db.close();
+Index: app/src/main/java/com/example/autoraidrpg/database/dao/local/StageLocalDAO.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/autoraidrpg/database/dao/local/StageLocalDAO.java b/app/src/main/java/com/example/autoraidrpg/database/dao/local/StageLocalDAO.java
+--- a/app/src/main/java/com/example/autoraidrpg/database/dao/local/StageLocalDAO.java	
++++ b/app/src/main/java/com/example/autoraidrpg/database/dao/local/StageLocalDAO.java	(date 1684589345767)
+@@ -10,12 +10,12 @@
+ public class StageLocalDAO {
+ 
+     public static final String TABLE = "stages";
+-    public static final String USER_ID = "userID";
++    public static final String USER_FIREBASE_ID = "userFirebaseID";
+     public static final String VALUE = "value";
+ 
+     public static String getTable() {
+-        return "CREATE TABLE " + TABLE + "(" + USER_ID + " INTEGER, " + VALUE + " INTEGER NOT NULL DEFAULT 1," +
+-                "FOREIGN KEY (" + USER_ID +  ") REFERENCES " + UserLocalDAO.TABLE + " (" + UserLocalDAO.ID + ") ON DELETE CASCADE)";
++        return "CREATE TABLE " + TABLE + "(" + USER_FIREBASE_ID + " TEXT NOT NULL DEFAULT 'NONE', " + VALUE + " INTEGER NOT NULL DEFAULT 1," +
++                "FOREIGN KEY (" + USER_FIREBASE_ID +  ") REFERENCES " + UserLocalDAO.TABLE + " (" + UserLocalDAO.FIREBASE_ID + ") ON DELETE CASCADE)";
+     }
+ 
+     // create
+@@ -23,7 +23,7 @@
+         SQLiteDatabase db = dbHelper.getWritableDatabase();
+         ContentValues cv = new ContentValues();
+ 
+-        cv.put(StageLocalDAO.USER_ID, stage.getUserID());
++        cv.put(StageLocalDAO.USER_FIREBASE_ID, stage.getUserFirebaseID());
+         cv.put(StageLocalDAO.VALUE, stage.getValue());
+ 
+         return db.insert(StageLocalDAO.TABLE, null, cv);
+@@ -35,13 +35,13 @@
+         Stage stage = null;
+ 
+         String[] projection = { "*" };
+-        String selection = "userID = ?";
++        String selection = "userFirebaseID = ?";
+         String[] selectionArgs = { String.valueOf(userID) };
+         Cursor cursor = db.query(StageLocalDAO.TABLE, projection, selection, selectionArgs, null, null, null);
+ 
+         if(cursor.moveToNext()) {
+             stage = new Stage(
+-                    cursor.getInt(cursor.getColumnIndexOrThrow(StageLocalDAO.USER_ID)),
++                    cursor.getString(cursor.getColumnIndexOrThrow(StageLocalDAO.USER_FIREBASE_ID)),
+                     cursor.getInt(cursor.getColumnIndexOrThrow(StageLocalDAO.VALUE))
+             );
+         }
+@@ -59,8 +59,8 @@
+         ContentValues cv = new ContentValues();
+         cv.put(StageLocalDAO.VALUE, stage.getValue());
+ 
+-        String selection = "userID = ?";
+-        String[] selectionArgs = { String.valueOf(stage.getUserID()) };
++        String selection = "userFirebaseID = ?";
++        String[] selectionArgs = { String.valueOf(stage.getUserFirebaseID()) };
+ 
+         db.update(StageLocalDAO.TABLE, cv, selection, selectionArgs);
+         db.close();
+Index: app/src/main/java/com/example/autoraidrpg/database/dao/local/PositionLocalDAO.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/autoraidrpg/database/dao/local/PositionLocalDAO.java b/app/src/main/java/com/example/autoraidrpg/database/dao/local/PositionLocalDAO.java
+--- a/app/src/main/java/com/example/autoraidrpg/database/dao/local/PositionLocalDAO.java	
++++ b/app/src/main/java/com/example/autoraidrpg/database/dao/local/PositionLocalDAO.java	(date 1684605127576)
+@@ -10,26 +10,26 @@
+ public class PositionLocalDAO {
+ 
+     public static final String TABLE = "positions";
+-    public static final String ID = "id";
+-    public static final String ROLE_COLLECTION_ID = "roleCollectionID";
++    public static final String FIREBASE_ID = "firebaseID";
++    public static final String ROLE_COLLECTION_FIREBASE_ID = "roleCollectionFirebaseID";
+     public static final String INDEX = "_index";
+     public static final String FRONT = "front";
+ 
+     public static String getTable() {
+-        return "CREATE TABLE " + TABLE + "(" + ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+-                ROLE_COLLECTION_ID + " INTEGER, " +
++        return "CREATE TABLE " + TABLE + "(" + FIREBASE_ID + " TEXT NOT NULL DEFAULT 'NONE', " +
++                ROLE_COLLECTION_FIREBASE_ID + " TEXT NOT NULL DEFAULT 'NONE', " +
+                 INDEX + " INTEGER, " +
+                 FRONT + " INTEGER, " +
+-                "FOREIGN KEY (" + ROLE_COLLECTION_ID +  ") REFERENCES " + RoleCollectionLocalDAO.TABLE + " (" + RoleCollectionLocalDAO.ID + ") ON DELETE CASCADE)";
++                "FOREIGN KEY (" + ROLE_COLLECTION_FIREBASE_ID +  ") REFERENCES " + RoleCollectionLocalDAO.TABLE + " (" + RoleCollectionLocalDAO.FIREBASE_ID + ") ON DELETE CASCADE)";
+     }
+ 
+     // generate
+-    public static long generate(SQLiteOpenHelper dbHelper, int roleCollectionID) {
++    public static long generate(SQLiteOpenHelper dbHelper, String roleCollectionFirebaseID) {
+         SQLiteDatabase db = dbHelper.getWritableDatabase();
+         ContentValues cv = new ContentValues();
+-        Position position = new Position(-1, roleCollectionID, -1, false);
++        Position position = new Position("NONE", roleCollectionFirebaseID, -1, false);
+ 
+-        cv.put(PositionLocalDAO.ROLE_COLLECTION_ID, position.getRoleCollectionID());
++        cv.put(PositionLocalDAO.ROLE_COLLECTION_FIREBASE_ID, position.getRoleCollectionFirebaseID());
+         cv.put(PositionLocalDAO.INDEX, position.getIndex());
+         cv.put(PositionLocalDAO.FRONT, position.isFront() ? 1 : 0);
+ 
+@@ -41,7 +41,7 @@
+         SQLiteDatabase db = dbHelper.getWritableDatabase();
+         ContentValues cv = new ContentValues();
+ 
+-        cv.put(PositionLocalDAO.ROLE_COLLECTION_ID, position.getRoleCollectionID());
++        cv.put(PositionLocalDAO.ROLE_COLLECTION_FIREBASE_ID, position.getRoleCollectionFirebaseID());
+         cv.put(PositionLocalDAO.INDEX, position.getIndex());
+         cv.put(PositionLocalDAO.FRONT, position.isFront() ? 1 : 0);
+ 
+@@ -49,19 +49,19 @@
+     }
+ 
+     // read
+-    public static Position retrieve(SQLiteOpenHelper dbHelper, int positionID) {
++    public static Position retrieve(SQLiteOpenHelper dbHelper, String firebaseID) {
+         SQLiteDatabase db = dbHelper.getReadableDatabase();
+         Position position = null;
+ 
+         String[] projection = { "*" };
+-        String selection = "id = ?";
+-        String[] selectionArgs = { String.valueOf(positionID) };
++        String selection = "firebaseID = ?";
++        String[] selectionArgs = { firebaseID };
+         Cursor cursor = db.query(PositionLocalDAO.TABLE, projection, selection, selectionArgs, null, null, null);
+ 
+         if(cursor.moveToNext()) {
+             position = new Position(
+-                    cursor.getInt(cursor.getColumnIndexOrThrow(PositionLocalDAO.ID)),
+-                    cursor.getInt(cursor.getColumnIndexOrThrow(PositionLocalDAO.ROLE_COLLECTION_ID)),
++                    cursor.getString(cursor.getColumnIndexOrThrow(PositionLocalDAO.FIREBASE_ID)),
++                    cursor.getString(cursor.getColumnIndexOrThrow(PositionLocalDAO.ROLE_COLLECTION_FIREBASE_ID)),
+                     cursor.getInt(cursor.getColumnIndexOrThrow(PositionLocalDAO.INDEX)),
+                     cursor.getInt(cursor.getColumnIndexOrThrow(PositionLocalDAO.FRONT)) == 1
+             );
+@@ -74,19 +74,19 @@
+     }
+ 
+     // read by id
+-    public static Position getByID(SQLiteOpenHelper dbHelper, int positionID) {
++    public static Position getByID(SQLiteOpenHelper dbHelper, String firebaseID) {
+         SQLiteDatabase db = dbHelper.getReadableDatabase();
+         Position position = null;
+ 
+         String[] projection = { "*" };
+-        String selection = "id = ?";
+-        String[] selectionArgs = { String.valueOf(positionID) };
++        String selection = "firebaseID = ?";
++        String[] selectionArgs = { firebaseID };
+         Cursor cursor = db.query(PositionLocalDAO.TABLE, projection, selection, selectionArgs, null, null, null);
+ 
+         if (cursor.moveToNext()) {
+             position = new Position(
+-                    cursor.getInt(cursor.getColumnIndexOrThrow(PositionLocalDAO.ID)),
+-                    cursor.getInt(cursor.getColumnIndexOrThrow(PositionLocalDAO.ROLE_COLLECTION_ID)),
++                    cursor.getString(cursor.getColumnIndexOrThrow(PositionLocalDAO.FIREBASE_ID)),
++                    cursor.getString(cursor.getColumnIndexOrThrow(PositionLocalDAO.ROLE_COLLECTION_FIREBASE_ID)),
+                     cursor.getInt(cursor.getColumnIndexOrThrow(PositionLocalDAO.INDEX)),
+                     cursor.getInt(cursor.getColumnIndexOrThrow(PositionLocalDAO.FRONT)) == 1
+             );
+@@ -102,10 +102,10 @@
+     public static long update(SQLiteOpenHelper dbHelper, Position position) {
+         SQLiteDatabase db = dbHelper.getWritableDatabase();
+         ContentValues cv = new ContentValues();
+-        String selection = "id = ?";
+-        String[] selectionArgs = { String.valueOf(position.getId()) };
++        String selection = "firebaseID = ?";
++        String[] selectionArgs = { position.getFirebaseID() };
+ 
+-        cv.put(PositionLocalDAO.ROLE_COLLECTION_ID, position.getRoleCollectionID());
++        cv.put(PositionLocalDAO.ROLE_COLLECTION_FIREBASE_ID, position.getRoleCollectionFirebaseID());
+         cv.put(PositionLocalDAO.INDEX, position.getIndex());
+         cv.put(PositionLocalDAO.FRONT, position.isFront());
+ 
+@@ -116,13 +116,13 @@
+     }
+ 
+     // update
+-    public static long updateEmpty(SQLiteOpenHelper dbHelper, int originalPositionID, int roleCollectionID) {
++    public static long updateEmpty(SQLiteOpenHelper dbHelper, String firebaseID, String roleCollectionFirebaseID) {
+         SQLiteDatabase db = dbHelper.getWritableDatabase();
+         ContentValues cv = new ContentValues();
+-        String selection = "id = ?";
+-        String[] selectionArgs = { String.valueOf(originalPositionID) };
++        String selection = "firebaseID = ?";
++        String[] selectionArgs = { firebaseID };
+ 
+-        cv.put(PositionLocalDAO.ROLE_COLLECTION_ID, roleCollectionID);
++        cv.put(PositionLocalDAO.ROLE_COLLECTION_FIREBASE_ID, roleCollectionFirebaseID);
+         cv.put(PositionLocalDAO.INDEX, -1);
+         cv.put(PositionLocalDAO.FRONT, 0);
+ 
+Index: app/src/main/java/com/example/autoraidrpg/database/dao/local/FormationLocalDAO.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/autoraidrpg/database/dao/local/FormationLocalDAO.java b/app/src/main/java/com/example/autoraidrpg/database/dao/local/FormationLocalDAO.java
+--- a/app/src/main/java/com/example/autoraidrpg/database/dao/local/FormationLocalDAO.java	
++++ b/app/src/main/java/com/example/autoraidrpg/database/dao/local/FormationLocalDAO.java	(date 1684590723841)
+@@ -13,28 +13,28 @@
+ public class FormationLocalDAO {
+ 
+     public static final String TABLE = "formations";
+-    public static final String ID = "id";
+-    public static final String USER_ID = "userID";
+-    public static final String POSITION_ID_A = "positionID_A";
+-    public static final String POSITION_ID_B = "positionID_B";
+-    public static final String POSITION_ID_C = "positionID_C";
+-    public static final String POSITION_ID_D = "positionID_D";
+-    public static final String POSITION_ID_E = "positionID_E";
++    public static final String FIREBASE_ID = "firebaseID";
++    public static final String USER_FIREBASE_ID = "userFirebaseID";
++    public static final String POSITION_FIREBASE_ID_A = "positionFirebaseIID_A";
++    public static final String POSITION_FIREBASE_ID_B = "positionFirebaseIID_B";
++    public static final String POSITION_FIREBASE_ID_C = "positionFirebaseIID_C";
++    public static final String POSITION_FIREBASE_ID_D = "positionFirebaseIID_D";
++    public static final String POSITION_FIREBASE_ID_E = "positionFirebaseIID_E";
+ 
+     public static String getTable() {
+-        return "CREATE TABLE " + TABLE + "(" + ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+-                USER_ID + " INTEGER, " +
+-                POSITION_ID_A + " INTEGER, " +
+-                POSITION_ID_B + " INTEGER, " +
+-                POSITION_ID_C + " INTEGER, " +
+-                POSITION_ID_D + " INTEGER, " +
+-                POSITION_ID_E + " INTEGER, " +
+-                "FOREIGN KEY (" + USER_ID +  ") REFERENCES " + UserLocalDAO.TABLE + " (" + UserLocalDAO.ID + ") ON DELETE CASCADE," +
+-                "FOREIGN KEY (" + POSITION_ID_A +  ") REFERENCES " + PositionLocalDAO.TABLE + " (" + PositionLocalDAO.ID + ") ON DELETE SET NULL," +
+-                "FOREIGN KEY (" + POSITION_ID_B +  ") REFERENCES " + PositionLocalDAO.TABLE + " (" + PositionLocalDAO.ID + ") ON DELETE SET NULL," +
+-                "FOREIGN KEY (" + POSITION_ID_C +  ") REFERENCES " + PositionLocalDAO.TABLE + " (" + PositionLocalDAO.ID + ") ON DELETE SET NULL," +
+-                "FOREIGN KEY (" + POSITION_ID_D +  ") REFERENCES " + PositionLocalDAO.TABLE + " (" + PositionLocalDAO.ID + ") ON DELETE SET NULL," +
+-                "FOREIGN KEY (" + POSITION_ID_E +  ") REFERENCES " + PositionLocalDAO.TABLE + " (" + PositionLocalDAO.ID + ") ON DELETE SET NULL)";
++        return "CREATE TABLE " + TABLE + "(" + FIREBASE_ID + " TEXT NOT NULL DEFAULT 'NONE', " +
++                USER_FIREBASE_ID + " TEXT NOT NULL DEFAULT 'NONE', " +
++                POSITION_FIREBASE_ID_A + " TEXT NOT NULL DEFAULT 'NONE', " +
++                POSITION_FIREBASE_ID_B + " TEXT NOT NULL DEFAULT 'NONE', " +
++                POSITION_FIREBASE_ID_C + " TEXT NOT NULL DEFAULT 'NONE', " +
++                POSITION_FIREBASE_ID_D + " TEXT NOT NULL DEFAULT 'NONE', " +
++                POSITION_FIREBASE_ID_E + " TEXT NOT NULL DEFAULT 'NONE', " +
++                "FOREIGN KEY (" + USER_FIREBASE_ID +  ") REFERENCES " + UserLocalDAO.TABLE + " (" + UserLocalDAO.FIREBASE_ID + ") ON DELETE CASCADE," +
++                "FOREIGN KEY (" + POSITION_FIREBASE_ID_A +  ") REFERENCES " + PositionLocalDAO.TABLE + " (" + PositionLocalDAO.FIREBASE_ID + ") ON DELETE SET NULL," +
++                "FOREIGN KEY (" + POSITION_FIREBASE_ID_B +  ") REFERENCES " + PositionLocalDAO.TABLE + " (" + PositionLocalDAO.FIREBASE_ID + ") ON DELETE SET NULL," +
++                "FOREIGN KEY (" + POSITION_FIREBASE_ID_C +  ") REFERENCES " + PositionLocalDAO.TABLE + " (" + PositionLocalDAO.FIREBASE_ID + ") ON DELETE SET NULL," +
++                "FOREIGN KEY (" + POSITION_FIREBASE_ID_D +  ") REFERENCES " + PositionLocalDAO.TABLE + " (" + PositionLocalDAO.FIREBASE_ID + ") ON DELETE SET NULL," +
++                "FOREIGN KEY (" + POSITION_FIREBASE_ID_E +  ") REFERENCES " + PositionLocalDAO.TABLE + " (" + PositionLocalDAO.FIREBASE_ID + ") ON DELETE SET NULL)";
+     }
+ 
+     // create
+@@ -42,35 +42,35 @@
+         SQLiteDatabase db = dbHelper.getWritableDatabase();
+         ContentValues cv = new ContentValues();
+ 
+-        cv.put(FormationLocalDAO.USER_ID, formation.getUserID());
+-        cv.put(FormationLocalDAO.POSITION_ID_A, formation.getPositionID_A());
+-        cv.put(FormationLocalDAO.POSITION_ID_B, formation.getPositionID_B());
+-        cv.put(FormationLocalDAO.POSITION_ID_C, formation.getPositionID_C());
+-        cv.put(FormationLocalDAO.POSITION_ID_D, formation.getPositionID_D());
+-        cv.put(FormationLocalDAO.POSITION_ID_E, formation.getPositionID_E());
++        cv.put(FormationLocalDAO.USER_FIREBASE_ID, formation.getUserFirebaseID());
++        cv.put(FormationLocalDAO.POSITION_FIREBASE_ID_A, formation.getPositionFirebaseID_A());
++        cv.put(FormationLocalDAO.POSITION_FIREBASE_ID_B, formation.getPositionFirebaseID_B());
++        cv.put(FormationLocalDAO.POSITION_FIREBASE_ID_C, formation.getPositionFirebaseID_C());
++        cv.put(FormationLocalDAO.POSITION_FIREBASE_ID_D, formation.getPositionFirebaseID_D());
++        cv.put(FormationLocalDAO.POSITION_FIREBASE_ID_E, formation.getPositionFirebaseID_E());
+ 
+         return db.insert(FormationLocalDAO.TABLE, null, cv);
+     }
+ 
+     // read
+-    public static Formation retrieveFirstFormation(SQLiteOpenHelper dbHelper, int userID) {
++    public static Formation retrieveFirstFormation(SQLiteOpenHelper dbHelper, String userFirebaseID) {
+         SQLiteDatabase db = dbHelper.getReadableDatabase();
+         Formation formation = null;
+ 
+         String[] projection = { "*" };
+-        String selection = "userID = ?";
+-        String[] selectionArgs = { String.valueOf(userID) };
++        String selection = "userFirebaseID = ?";
++        String[] selectionArgs = { userFirebaseID };
+         Cursor cursor = db.query(FormationLocalDAO.TABLE, projection, selection, selectionArgs, null, null, null);
+ 
+         if(cursor.moveToNext()) {
+             formation = new Formation(
+-                    cursor.getInt(cursor.getColumnIndexOrThrow(FormationLocalDAO.ID)),
+-                    cursor.getInt(cursor.getColumnIndexOrThrow(FormationLocalDAO.USER_ID)),
+-                    cursor.getInt(cursor.getColumnIndexOrThrow(FormationLocalDAO.POSITION_ID_A)),
+-                    cursor.getInt(cursor.getColumnIndexOrThrow(FormationLocalDAO.POSITION_ID_B)),
+-                    cursor.getInt(cursor.getColumnIndexOrThrow(FormationLocalDAO.POSITION_ID_C)),
+-                    cursor.getInt(cursor.getColumnIndexOrThrow(FormationLocalDAO.POSITION_ID_D)),
+-                    cursor.getInt(cursor.getColumnIndexOrThrow(FormationLocalDAO.POSITION_ID_E))
++                    cursor.getString(cursor.getColumnIndexOrThrow(FormationLocalDAO.FIREBASE_ID)),
++                    cursor.getString(cursor.getColumnIndexOrThrow(FormationLocalDAO.USER_FIREBASE_ID)),
++                    cursor.getString(cursor.getColumnIndexOrThrow(FormationLocalDAO.POSITION_FIREBASE_ID_A)),
++                    cursor.getString(cursor.getColumnIndexOrThrow(FormationLocalDAO.POSITION_FIREBASE_ID_B)),
++                    cursor.getString(cursor.getColumnIndexOrThrow(FormationLocalDAO.POSITION_FIREBASE_ID_C)),
++                    cursor.getString(cursor.getColumnIndexOrThrow(FormationLocalDAO.POSITION_FIREBASE_ID_D)),
++                    cursor.getString(cursor.getColumnIndexOrThrow(FormationLocalDAO.POSITION_FIREBASE_ID_E))
+             );
+         }
+ 
+@@ -81,24 +81,24 @@
+     }
+ 
+     // read all
+-    public static List<Formation> all(SQLiteOpenHelper dbHelper, int userID) {
++    public static List<Formation> all(SQLiteOpenHelper dbHelper, String userFirebaseID) {
+         SQLiteDatabase db = dbHelper.getReadableDatabase();
+         List<Formation> formations = new ArrayList<>();
+ 
+         String[] projection = { "*" };
+-        String selection = "userID = ?";
+-        String[] selectionArgs = { String.valueOf(userID) };
++        String selection = "userFirebaseID = ?";
++        String[] selectionArgs = { userFirebaseID };
+         Cursor cursor = db.query(FormationLocalDAO.TABLE, projection, selection, selectionArgs, null, null, null);
+ 
+         while (cursor.moveToNext()) {
+             formations.add(new Formation(
+-                    cursor.getInt(cursor.getColumnIndexOrThrow(FormationLocalDAO.ID)),
+-                    cursor.getInt(cursor.getColumnIndexOrThrow(FormationLocalDAO.USER_ID)),
+-                    cursor.getInt(cursor.getColumnIndexOrThrow(FormationLocalDAO.POSITION_ID_A)),
+-                    cursor.getInt(cursor.getColumnIndexOrThrow(FormationLocalDAO.POSITION_ID_B)),
+-                    cursor.getInt(cursor.getColumnIndexOrThrow(FormationLocalDAO.POSITION_ID_C)),
+-                    cursor.getInt(cursor.getColumnIndexOrThrow(FormationLocalDAO.POSITION_ID_D)),
+-                    cursor.getInt(cursor.getColumnIndexOrThrow(FormationLocalDAO.POSITION_ID_E))
++                    cursor.getString(cursor.getColumnIndexOrThrow(FormationLocalDAO.FIREBASE_ID)),
++                    cursor.getString(cursor.getColumnIndexOrThrow(FormationLocalDAO.USER_FIREBASE_ID)),
++                    cursor.getString(cursor.getColumnIndexOrThrow(FormationLocalDAO.POSITION_FIREBASE_ID_A)),
++                    cursor.getString(cursor.getColumnIndexOrThrow(FormationLocalDAO.POSITION_FIREBASE_ID_B)),
++                    cursor.getString(cursor.getColumnIndexOrThrow(FormationLocalDAO.POSITION_FIREBASE_ID_C)),
++                    cursor.getString(cursor.getColumnIndexOrThrow(FormationLocalDAO.POSITION_FIREBASE_ID_D)),
++                    cursor.getString(cursor.getColumnIndexOrThrow(FormationLocalDAO.POSITION_FIREBASE_ID_E))
+             ));
+         }
+ 
+Index: app/src/main/java/com/example/autoraidrpg/database/dao/local/InventoryLocalDAO.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/autoraidrpg/database/dao/local/InventoryLocalDAO.java b/app/src/main/java/com/example/autoraidrpg/database/dao/local/InventoryLocalDAO.java
+--- a/app/src/main/java/com/example/autoraidrpg/database/dao/local/InventoryLocalDAO.java	
++++ b/app/src/main/java/com/example/autoraidrpg/database/dao/local/InventoryLocalDAO.java	(date 1684590945747)
+@@ -13,15 +13,15 @@
+ public class InventoryLocalDAO {
+ 
+     public static final String TABLE = "inventories";
+-    public static final String ID = "id";
+-    public static final String USER_ID = "userID";
++    public static final String FIREBASE_ID = "firebaseID";
++    public static final String USER_FIREBASE_ID = "userFirebaseID";
+     public static final String ITEM_ID = "itemID";
+     public static final String RATING = "rating";
+ 
+     public static String getTable() {
+-        return "CREATE TABLE " + TABLE + "(" + ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+-                USER_ID + " INTEGER, " + ITEM_ID + " INTEGER, " + RATING + " INTEGER NOT NULL DEFAULT 1," +
+-                "FOREIGN KEY (" + USER_ID +  ") REFERENCES " + UserLocalDAO.TABLE + " (" + UserLocalDAO.ID + ") ON DELETE CASCADE," +
++        return "CREATE TABLE " + TABLE + "(" + FIREBASE_ID + " TEXT NOT NULL DEFAULT 'NONE', " +
++                USER_FIREBASE_ID + " TEXT NOT NULL DEFAULT 'NONE', " + ITEM_ID + " INTEGER, " + RATING + " INTEGER NOT NULL DEFAULT 1," +
++                "FOREIGN KEY (" + USER_FIREBASE_ID +  ") REFERENCES " + UserLocalDAO.TABLE + " (" + UserLocalDAO.FIREBASE_ID + ") ON DELETE CASCADE," +
+                 "FOREIGN KEY (" + ITEM_ID +  ") REFERENCES " + ItemLocalDAO.TABLE + " (" + ItemLocalDAO.ID + ") ON DELETE CASCADE)";
+     }
+ 
+@@ -30,7 +30,7 @@
+         SQLiteDatabase db = dbHelper.getWritableDatabase();
+         ContentValues cv = new ContentValues();
+ 
+-        cv.put(InventoryLocalDAO.USER_ID, inventory.getUserID());
++        cv.put(InventoryLocalDAO.USER_FIREBASE_ID, inventory.getUserFirebaseID());
+         cv.put(InventoryLocalDAO.ITEM_ID, inventory.getItemID());
+         cv.put(InventoryLocalDAO.RATING, inventory.getRating());
+ 
+@@ -38,19 +38,19 @@
+     }
+ 
+     // read
+-    public static Inventory retrieve(SQLiteOpenHelper dbHelper, int userID, int inventoryID) {
++    public static Inventory retrieve(SQLiteOpenHelper dbHelper, String firebaseID, String userFirebaseID) {
+         SQLiteDatabase db = dbHelper.getReadableDatabase();
+         Inventory inventory = null;
+ 
+         String[] projection = { "*" };
+-        String selection = "id = ? AND userID = ?";
+-        String[] selectionArgs = { String.valueOf(inventoryID), String.valueOf(userID) };
++        String selection = "firebaseID = ? AND userFirebaseID = ?";
++        String[] selectionArgs = { firebaseID, userFirebaseID };
+         Cursor cursor = db.query(InventoryLocalDAO.TABLE, projection, selection, selectionArgs, null, null, null);
+ 
+         if(cursor.moveToNext()) {
+             inventory = new Inventory(
+-                    cursor.getInt(cursor.getColumnIndexOrThrow(InventoryLocalDAO.ID)),
+-                    cursor.getInt(cursor.getColumnIndexOrThrow(InventoryLocalDAO.USER_ID)),
++                    cursor.getString(cursor.getColumnIndexOrThrow(InventoryLocalDAO.FIREBASE_ID)),
++                    cursor.getString(cursor.getColumnIndexOrThrow(InventoryLocalDAO.USER_FIREBASE_ID)),
+                     cursor.getInt(cursor.getColumnIndexOrThrow(InventoryLocalDAO.ITEM_ID)),
+                     cursor.getInt(cursor.getColumnIndexOrThrow(InventoryLocalDAO.RATING))
+             );
+@@ -63,19 +63,19 @@
+     }
+ 
+     // read all
+-    public static List<Inventory> all(SQLiteOpenHelper dbHelper, int userID) {
++    public static List<Inventory> all(SQLiteOpenHelper dbHelper, String userFirebaseID) {
+         SQLiteDatabase db = dbHelper.getReadableDatabase();
+         List<Inventory> inventories = new ArrayList<>();
+ 
+         String[] projection = { "*" };
+-        String selection = "userID = ?";
+-        String[] selectionArgs = { String.valueOf(userID) };
++        String selection = "userFirebaseID = ?";
++        String[] selectionArgs = { userFirebaseID };
+         Cursor cursor = db.query(InventoryLocalDAO.TABLE, projection, selection, selectionArgs, null, null, null);
+ 
+         while (cursor.moveToNext()) {
+             inventories.add(new Inventory(
+-                    cursor.getInt(cursor.getColumnIndexOrThrow(InventoryLocalDAO.ID)),
+-                    cursor.getInt(cursor.getColumnIndexOrThrow(InventoryLocalDAO.USER_ID)),
++                    cursor.getString(cursor.getColumnIndexOrThrow(InventoryLocalDAO.FIREBASE_ID)),
++                    cursor.getString(cursor.getColumnIndexOrThrow(InventoryLocalDAO.USER_FIREBASE_ID)),
+                     cursor.getInt(cursor.getColumnIndexOrThrow(InventoryLocalDAO.ITEM_ID)),
+                     cursor.getInt(cursor.getColumnIndexOrThrow(InventoryLocalDAO.RATING))
+             ));
+Index: app/src/main/java/com/example/autoraidrpg/database/dao/local/RoleCollectionLocalDAO.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/autoraidrpg/database/dao/local/RoleCollectionLocalDAO.java b/app/src/main/java/com/example/autoraidrpg/database/dao/local/RoleCollectionLocalDAO.java
+--- a/app/src/main/java/com/example/autoraidrpg/database/dao/local/RoleCollectionLocalDAO.java	
++++ b/app/src/main/java/com/example/autoraidrpg/database/dao/local/RoleCollectionLocalDAO.java	(date 1684590121396)
+@@ -12,9 +12,9 @@
+ 
+ public class RoleCollectionLocalDAO {
+ 
+-    public static final String TABLE = "role_collection";
+-    public static final String ID = "id";
+-    public static final String USER_ID = "userID";
++    public static final String TABLE = "role_collections";
++    public static final String FIREBASE_ID = "firebaseID";
++    public static final String USER_FIREBASE_ID = "userFirebaseID";
+     public static final String ROLE_ID = "roleID";
+     public static final String LEVEL = "level";
+     public static final String RATING = "rating";
+@@ -25,14 +25,14 @@
+     public static final String SKILL_E = "skillE";
+ 
+     public static String getTable() {
+-        return "CREATE TABLE " + TABLE + "(" + ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+-                USER_ID + " INTEGER, " + ROLE_ID + " INTEGER, " + LEVEL + " INTEGER NOT NULL DEFAULT 1," + RATING + " INTEGER NOT NULL DEFAULT 1," +
++        return "CREATE TABLE " + TABLE + "(" + FIREBASE_ID + " TEXT NOT NULL DEFAULT 'NONE', " +
++                USER_FIREBASE_ID + " TEXT NOT NULL DEFAULT 'NONE', " + ROLE_ID + " INTEGER, " + LEVEL + " INTEGER NOT NULL DEFAULT 1," + RATING + " INTEGER NOT NULL DEFAULT 1," +
+                 SKILL_A + " INTEGER NOT NULL DEFAULT 1," +
+                 SKILL_B + " INTEGER NOT NULL DEFAULT 1," +
+                 SKILL_C + " INTEGER NOT NULL DEFAULT 1," +
+                 SKILL_D + " INTEGER NOT NULL DEFAULT 1," +
+                 SKILL_E + " INTEGER NOT NULL DEFAULT 1," +
+-                "FOREIGN KEY (" + USER_ID +  ") REFERENCES " + UserLocalDAO.TABLE + " (" + UserLocalDAO.ID + ") ON DELETE CASCADE," +
++                "FOREIGN KEY (" + USER_FIREBASE_ID +  ") REFERENCES " + UserLocalDAO.TABLE + " (" + UserLocalDAO.FIREBASE_ID + ") ON DELETE CASCADE," +
+                 "FOREIGN KEY (" + ROLE_ID +  ") REFERENCES " + RoleLocalDAO.TABLE + " (" + RoleLocalDAO.ID + ") ON DELETE CASCADE)";
+     }
+ 
+@@ -41,7 +41,7 @@
+         SQLiteDatabase db = dbHelper.getWritableDatabase();
+         ContentValues cv = new ContentValues();
+ 
+-        cv.put(RoleCollectionLocalDAO.USER_ID, roleCollection.getUserID());
++        cv.put(RoleCollectionLocalDAO.USER_FIREBASE_ID, roleCollection.getUserFirebaseID());
+         cv.put(RoleCollectionLocalDAO.ROLE_ID, roleCollection.getRoleID());
+         cv.put(RoleCollectionLocalDAO.LEVEL, roleCollection.getLevel());
+         cv.put(RoleCollectionLocalDAO.RATING, roleCollection.getRating());
+@@ -55,19 +55,19 @@
+     }
+ 
+     // read
+-    public static RoleCollection retrieve(SQLiteOpenHelper dbHelper, int userID, int roleCollectionID) {
++    public static RoleCollection retrieve(SQLiteOpenHelper dbHelper, String firebaseID) {
+         SQLiteDatabase db = dbHelper.getReadableDatabase();
+         RoleCollection roleCollection = null;
+ 
+         String[] projection = { "*" };
+-        String selection = "id = ? AND userID = ?";
+-        String[] selectionArgs = { String.valueOf(roleCollectionID), String.valueOf(userID) };
++        String selection = "firebaseID = ?";
++        String[] selectionArgs = { firebaseID };
+         Cursor cursor = db.query(RoleCollectionLocalDAO.TABLE, projection, selection, selectionArgs, null, null, null);
+ 
+         if(cursor.moveToNext()) {
+             roleCollection = new RoleCollection(
+-                    cursor.getInt(cursor.getColumnIndexOrThrow(RoleCollectionLocalDAO.ID)),
+-                    cursor.getInt(cursor.getColumnIndexOrThrow(RoleCollectionLocalDAO.USER_ID)),
++                    cursor.getString(cursor.getColumnIndexOrThrow(RoleCollectionLocalDAO.FIREBASE_ID)),
++                    cursor.getString(cursor.getColumnIndexOrThrow(RoleCollectionLocalDAO.USER_FIREBASE_ID)),
+                     cursor.getInt(cursor.getColumnIndexOrThrow(RoleCollectionLocalDAO.ROLE_ID)),
+                     cursor.getInt(cursor.getColumnIndexOrThrow(RoleCollectionLocalDAO.LEVEL)),
+                     cursor.getInt(cursor.getColumnIndexOrThrow(RoleCollectionLocalDAO.RATING)),
+@@ -86,19 +86,19 @@
+     }
+ 
+     // read all
+-    public static List<RoleCollection> all(SQLiteOpenHelper dbHelper, int userID) {
++    public static List<RoleCollection> all(SQLiteOpenHelper dbHelper, String userFirebaseID) {
+         SQLiteDatabase db = dbHelper.getReadableDatabase();
+         List<RoleCollection> roleCollections = new ArrayList<>();
+ 
+         String[] projection = { "*" };
+-        String selection = "userID = ?";
+-        String[] selectionArgs = { String.valueOf(userID) };
++        String selection = "userFirebaseID = ?";
++        String[] selectionArgs = { userFirebaseID };
+         Cursor cursor = db.query(RoleCollectionLocalDAO.TABLE, projection, selection, selectionArgs, null, null, null);
+ 
+         while (cursor.moveToNext()) {
+             roleCollections.add(new RoleCollection(
+-                    cursor.getInt(cursor.getColumnIndexOrThrow(RoleCollectionLocalDAO.ID)),
+-                    cursor.getInt(cursor.getColumnIndexOrThrow(RoleCollectionLocalDAO.USER_ID)),
++                    cursor.getString(cursor.getColumnIndexOrThrow(RoleCollectionLocalDAO.FIREBASE_ID)),
++                    cursor.getString(cursor.getColumnIndexOrThrow(RoleCollectionLocalDAO.USER_FIREBASE_ID)),
+                     cursor.getInt(cursor.getColumnIndexOrThrow(RoleCollectionLocalDAO.ROLE_ID)),
+                     cursor.getInt(cursor.getColumnIndexOrThrow(RoleCollectionLocalDAO.LEVEL)),
+                     cursor.getInt(cursor.getColumnIndexOrThrow(RoleCollectionLocalDAO.RATING)),
+@@ -120,8 +120,8 @@
+     public static long update(SQLiteOpenHelper dbHelper, RoleCollection roleCollection) {
+         SQLiteDatabase db = dbHelper.getWritableDatabase();
+         ContentValues cv = new ContentValues();
+-        String selection = "id = ?";
+-        String[] selectionArgs = { String.valueOf(roleCollection.getId()) };
++        String selection = "firebaseID = ?";
++        String[] selectionArgs = { roleCollection.getFirebaseID() };
+ 
+         cv.put(RoleCollectionLocalDAO.LEVEL, roleCollection.getLevel());
+         cv.put(RoleCollectionLocalDAO.RATING, roleCollection.getRating());
+Index: app/src/main/java/com/example/autoraidrpg/gameplay/bag/Item.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/autoraidrpg/gameplay/bag/Item.java b/app/src/main/java/com/example/autoraidrpg/gameplay/bag/Item.java
+--- a/app/src/main/java/com/example/autoraidrpg/gameplay/bag/Item.java	
++++ b/app/src/main/java/com/example/autoraidrpg/gameplay/bag/Item.java	(date 1684583450837)
+@@ -6,7 +6,7 @@
+ 
+ public abstract class Item implements Serializable {
+ 
+-    protected int inventoryID;
++    protected String inventoryFirebaseID;
+     protected String name;
+     protected int itemImage, rating;
+     protected double price;
+@@ -26,11 +26,16 @@
+         description = new ArrayList<>();
+     }
+ 
+-    public Item setInventoryID(int inventoryID) { this.inventoryID = inventoryID; return this; }
++    public String getInventoryFirebaseID() {
++        return inventoryFirebaseID;
++    }
++
++    public Item setInventoryFirebaseID(String inventoryFirebaseID) {
++        this.inventoryFirebaseID = inventoryFirebaseID;
++        return this;
++    }
++
+     public Item setRating(int rating) { this.rating = rating; return this; }
+-
+-    public int getInventoryID() { return inventoryID; }
+-
+     public String getName() { return name; }
+     public double getPrice() { return price; }
+     public int getItemImage() { return itemImage; }
+Index: app/src/main/java/com/example/autoraidrpg/gameplay/battle/Battle.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/autoraidrpg/gameplay/battle/Battle.java b/app/src/main/java/com/example/autoraidrpg/gameplay/battle/Battle.java
+--- a/app/src/main/java/com/example/autoraidrpg/gameplay/battle/Battle.java	
++++ b/app/src/main/java/com/example/autoraidrpg/gameplay/battle/Battle.java	(date 1684591870962)
+@@ -1,6 +1,10 @@
+ package com.example.autoraidrpg.gameplay.battle;
+ 
++import android.content.Context;
++
+ import com.example.autoraidrpg.database.DatabaseHelper;
++import com.example.autoraidrpg.database.dao.cloud.StageCloudDAO;
++import com.example.autoraidrpg.database.dao.cloud.UserCloudDAO;
+ import com.example.autoraidrpg.database.dao.local.StageLocalDAO;
+ import com.example.autoraidrpg.database.dao.local.UserLocalDAO;
+ import com.example.autoraidrpg.gameplay.entity.Entity;
+@@ -31,6 +35,7 @@
+     private String result = "";
+     private boolean win = false;
+     private DatabaseHelper databaseHelper;
++    private Context context;
+     private User user;
+ 
+     // observers
+@@ -44,7 +49,8 @@
+         battleSubject = BattleInformationObserver.getInstance();
+     }
+ 
+-    public void dao(DatabaseHelper databaseHelper, User user) {
++    public void dao(Context context, DatabaseHelper databaseHelper, User user) {
++        this.context = context;
+         this.databaseHelper = databaseHelper;
+         this.user = user;
+     }
+@@ -175,13 +181,15 @@
+                 rewardDiamonds = reward.getDiamond() <= 0 ? "" : reward.getDiamond() + " diamonds";
+ 
+                 // update stage
+-                com.example.autoraidrpg.model.Stage stageData = new com.example.autoraidrpg.model.Stage(user.getId(), stage.getLevel()); // new stage
+-                com.example.autoraidrpg.model.Stage retrievedStage = StageLocalDAO.retrieve(databaseHelper, user.getId());
++                com.example.autoraidrpg.model.Stage stageData = new com.example.autoraidrpg.model.Stage(user.getFirebaseID(), stage.getLevel()); // new stage
++                // com.example.autoraidrpg.model.Stage retrievedStage = StageLocalDAO.retrieve(databaseHelper, user.getId());
++                com.example.autoraidrpg.model.Stage retrievedStage = new StageCloudDAO(context).retrieveByUserID(user.getFirebaseID());
+ 
+                 // check if the stage played was the latest
+                 if(stageData.getValue() >= retrievedStage.getValue()) {
+                     stageData.increment();
+-                    StageLocalDAO.update(databaseHelper, stageData);
++                    // StageLocalDAO.update(databaseHelper, stageData);
++                    new StageCloudDAO(context).put(stageData.getUserFirebaseID(), stageData);
+                 } else {
+                     switch (stage.getState()) {
+                         case CAMPAIGN:
+@@ -202,7 +210,8 @@
+                 user.addGold(reward.getCoin());
+                 user.addExp(reward.getExp());
+                 user.addDiamond(reward.getDiamond());
+-                UserLocalDAO.update(databaseHelper, user);
++                // UserLocalDAO.update(databaseHelper, user);
++                new UserCloudDAO(context).put(user.getFirebaseID(), user);
+             }
+ 
+             this.biConsumer.accept(result,  String.format("%s%n%s%n%s", rewardCoins, rewardExp, rewardDiamonds));
+Index: app/src/main/java/com/example/autoraidrpg/gameplay/entity/Entity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/autoraidrpg/gameplay/entity/Entity.java b/app/src/main/java/com/example/autoraidrpg/gameplay/entity/Entity.java
+--- a/app/src/main/java/com/example/autoraidrpg/gameplay/entity/Entity.java	
++++ b/app/src/main/java/com/example/autoraidrpg/gameplay/entity/Entity.java	(date 1684588511511)
+@@ -15,10 +15,10 @@
+ public abstract class Entity implements Comparable<Entity> {
+ 
+     // database
+-    protected int roleID, roleCollectionID;
++    protected int roleID;
+ 
+-    // intances
+-    protected String name, description;
++    // instances
++    protected String roleCollectionFirebaseID, name, description;
+     protected int roleImage, level, rating;
+     protected double priceCoin, priceDiamond;
+     protected boolean isDead = false;
+@@ -190,7 +190,6 @@
+     }
+ 
+     public void setRoleID(int roleID) { this.roleID = roleID; }
+-    public void setRoleCollectionID(int roleCollectionID) { this.roleCollectionID = roleCollectionID; }
+     public Entity setName(String name) { this.name = name; return this; }
+     public Entity setLevel(int level) { this.level = level; return this; }
+     public Entity setRating(int rating) { this.rating = rating; return this; }
+@@ -206,7 +205,15 @@
+     public Entity setMagPen(double bMagPen) { this.bMagPen = bMagPen; return this; }
+     public Entity setAcc(double bAcc) { this.bAcc = bAcc; return this; }
+     public Entity setFormationType(FormationType formationType) { this.formationType = formationType; return this; }
+-    
++
++    public String getRoleCollectionFirebaseID() {
++        return roleCollectionFirebaseID;
++    }
++
++    public void setRoleCollectionFirebaseID(String roleCollectionFirebaseID) {
++        this.roleCollectionFirebaseID = roleCollectionFirebaseID;
++    }
++
+     public double getBasedHp() { return hp; }
+     public double getBasedPhyDmg() { return phyDmg; }
+     public double getBasedMagDmg() { return magDmg; }
+@@ -221,7 +228,6 @@
+     public double getBasedAcc() { return acc; }
+ 
+     public int getRoleID() { return roleID; }
+-    public int getRoleCollectionID() { return roleCollectionID; }
+     public String getName() { return name; }
+     public String getDescription() { return description; }
+     public int getRoleImage() { return roleImage; }
+Index: app/src/main/java/com/example/autoraidrpg/controller/Controller.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/autoraidrpg/controller/Controller.java b/app/src/main/java/com/example/autoraidrpg/controller/Controller.java
+--- a/app/src/main/java/com/example/autoraidrpg/controller/Controller.java	
++++ b/app/src/main/java/com/example/autoraidrpg/controller/Controller.java	(date 1684604878403)
+@@ -6,6 +6,7 @@
+ import android.content.Intent;
+ import android.content.SharedPreferences;
+ import android.text.TextUtils;
++import android.util.Log;
+ import android.view.View;
+ import android.widget.TextView;
+ import android.widget.Toast;
+@@ -62,10 +63,10 @@
+         editor.apply();
+     }
+ 
+-    public User user(AppCompatActivity activity, DatabaseHelper databaseHelper) {
++    public User user(AppCompatActivity activity) {
+         String json = activity.getSharedPreferences(AuthConfig.USER_SESSION, MODE_PRIVATE).getString(AuthConfig.SESSION_KEY_USER, "");
+         User user = gson.fromJson(json, User.class);
+-        return new UserCloudDAO(activity).retrieve(user.getFirebaseID());
++        return null;
+     }
+ 
+     public boolean isAuthenticated(AppCompatActivity activity) {
+Index: app/src/main/java/com/example/autoraidrpg/controller/PvpController.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/autoraidrpg/controller/PvpController.java b/app/src/main/java/com/example/autoraidrpg/controller/PvpController.java
+--- a/app/src/main/java/com/example/autoraidrpg/controller/PvpController.java	
++++ b/app/src/main/java/com/example/autoraidrpg/controller/PvpController.java	(date 1684591268304)
+@@ -11,6 +11,8 @@
+ import com.example.autoraidrpg.R;
+ import com.example.autoraidrpg.adapter.PreparationUnitInfoAdapter;
+ import com.example.autoraidrpg.database.DatabaseHelper;
++import com.example.autoraidrpg.database.dao.cloud.BagCloudDAO;
++import com.example.autoraidrpg.database.dao.cloud.InventoryCloudDAO;
+ import com.example.autoraidrpg.database.dao.local.BagLocalDAO;
+ import com.example.autoraidrpg.database.dao.local.InventoryLocalDAO;
+ import com.example.autoraidrpg.database.dao.local.ItemLocalDAO;
+@@ -65,7 +67,7 @@
+ 
+         // retrieve authenticated user session
+         databaseHelper = new DatabaseHelper(activity.getApplicationContext());
+-        user = user(activity, databaseHelper);
++        user = user(activity);
+ 
+         // set up names
+         allyUnits = (List<PreparationUnitInfoAdapter>) intent.getSerializableExtra("allyUnits");
+@@ -167,7 +169,7 @@
+ 
+         // battle
+         Battle battle = new Battle(allies, hostiles);
+-        battle.dao(databaseHelper, user);
++        battle.dao(activity, databaseHelper, user);
+         battle.setFinishedBiConsumer((result, reward) -> {
+             Intent intent = new Intent(activity.getApplicationContext(), PvpResultActivity.class);
+             intent.putExtra("result", result);
+@@ -202,22 +204,23 @@
+             unit.setLevel(level).setRating(rating);
+ 
+             // equip items
+-            Bag currentBag = BagLocalDAO.retrieve(databaseHelper, roleCollection.getId());
++            // Bag currentBag = BagLocalDAO.retrieve(databaseHelper, roleCollection.getId());
++            Bag currentBag = new BagCloudDAO(activity).retrieveByRoleCollectionID(roleCollection.getFirebaseID());
+             Inventory inventory = unit.getInventory();
+ 
+             // set existing items at the bag
+-            equipItem(inventory, currentBag.getInventoryID_A(), 0);
+-            equipItem(inventory, currentBag.getInventoryID_B(), 1);
+-            equipItem(inventory, currentBag.getInventoryID_C(), 2);
+-            equipItem(inventory, currentBag.getInventoryID_D(), 3);
+-            equipItem(inventory, currentBag.getInventoryID_E(), 4);
+-            equipItem(inventory, currentBag.getInventoryID_F(), 5);
+-            equipItem(inventory, currentBag.getInventoryID_G(), 6);
+-            equipItem(inventory, currentBag.getInventoryID_H(), 7);
+-            equipItem(inventory, currentBag.getInventoryID_I(), 8);
+-            equipItem(inventory, currentBag.getInventoryID_G(), 9);
+-            equipItem(inventory, currentBag.getInventoryID_K(), 10);
+-            equipItem(inventory, currentBag.getInventoryID_L(), 11);
++            equipItem(inventory, currentBag.getInventoryFirebaseID_A(), 0);
++            equipItem(inventory, currentBag.getInventoryFirebaseID_B(), 1);
++            equipItem(inventory, currentBag.getInventoryFirebaseID_C(), 2);
++            equipItem(inventory, currentBag.getInventoryFirebaseID_D(), 3);
++            equipItem(inventory, currentBag.getInventoryFirebaseID_E(), 4);
++            equipItem(inventory, currentBag.getInventoryFirebaseID_F(), 5);
++            equipItem(inventory, currentBag.getInventoryFirebaseID_G(), 6);
++            equipItem(inventory, currentBag.getInventoryFirebaseID_H(), 7);
++            equipItem(inventory, currentBag.getInventoryFirebaseID_I(), 8);
++            equipItem(inventory, currentBag.getInventoryFirebaseID_G(), 9);
++            equipItem(inventory, currentBag.getInventoryFirebaseID_K(), 10);
++            equipItem(inventory, currentBag.getInventoryFirebaseID_L(), 11);
+ 
+             unit.initStats();
+ 
+@@ -227,8 +230,9 @@
+     }
+ 
+     // equip existing items
+-    private void equipItem(Inventory inventory, int inventoryID, int index) {
+-        com.example.autoraidrpg.model.Inventory tempInventory = InventoryLocalDAO.retrieve(databaseHelper, user.getId(), inventoryID);
++    private void equipItem(Inventory inventory, String inventoryFirebaseID, int index) {
++        // com.example.autoraidrpg.model.Inventory tempInventory = InventoryLocalDAO.retrieve(databaseHelper, user.getId(), inventoryID);
++        com.example.autoraidrpg.model.Inventory tempInventory = new InventoryCloudDAO(activity).retrieve(inventoryFirebaseID);
+ 
+         if(tempInventory != null) {
+             com.example.autoraidrpg.model.Item tempItem = ItemLocalDAO.retrieve(databaseHelper, tempInventory.getItemID());
+Index: app/src/main/java/com/example/autoraidrpg/controller/MainController.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/autoraidrpg/controller/MainController.java b/app/src/main/java/com/example/autoraidrpg/controller/MainController.java
+--- a/app/src/main/java/com/example/autoraidrpg/controller/MainController.java	
++++ b/app/src/main/java/com/example/autoraidrpg/controller/MainController.java	(date 1684605352629)
+@@ -4,6 +4,7 @@
+ 
+ import android.content.Intent;
+ import android.os.BatteryManager;
++import android.util.Log;
+ import android.view.View;
+ import android.widget.ImageButton;
+ import android.widget.TextView;
+@@ -22,6 +23,10 @@
+ import com.example.autoraidrpg.RoleShopActivity;
+ import com.example.autoraidrpg.StageActivity;
+ import com.example.autoraidrpg.database.DatabaseHelper;
++import com.example.autoraidrpg.database.dao.cloud.FormationCloudDAO;
++import com.example.autoraidrpg.database.dao.cloud.PositionCloudDAO;
++import com.example.autoraidrpg.database.dao.cloud.RoleCollectionCloudDAO;
++import com.example.autoraidrpg.database.dao.cloud.UserCloudDAO;
+ import com.example.autoraidrpg.database.dao.local.FormationLocalDAO;
+ import com.example.autoraidrpg.database.dao.local.PositionLocalDAO;
+ import com.example.autoraidrpg.database.dao.local.RoleCollectionLocalDAO;
+@@ -66,30 +71,81 @@
+         roles.clear();
+         teamRoles.clear();
+ 
+-        // retrieve authenticated user session
+-        User user = user(activity, databaseHelper);
+-        Formation mainFormation = FormationLocalDAO.retrieveFirstFormation(databaseHelper, user.getId());
+-
+         // battery information
+         BatteryManager bm = (BatteryManager) activity.getSystemService(BATTERY_SERVICE);
+         int batteryPercentage = bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY);
+         String message = "Battery: " + batteryPercentage + "%";
+         activity.getBatteryText().setText(message);
+ 
++        // retrieve authenticated user session
++        User user = user(activity);
++        new UserCloudDAO(activity).retrieve(user.getFirebaseID(), u -> {
++            Formation mainFormation = FormationLocalDAO.retrieveFirstFormation(databaseHelper, user.getFirebaseID());
++
++            positions.add(PositionLocalDAO.getByID(databaseHelper, mainFormation.getPositionFirebaseID_A()));
++            positions.add(PositionLocalDAO.getByID(databaseHelper, mainFormation.getPositionFirebaseID_B()));
++            positions.add(PositionLocalDAO.getByID(databaseHelper, mainFormation.getPositionFirebaseID_C()));
++            positions.add(PositionLocalDAO.getByID(databaseHelper, mainFormation.getPositionFirebaseID_D()));
++            positions.add(PositionLocalDAO.getByID(databaseHelper, mainFormation.getPositionFirebaseID_E()));
++
++            // retrieve role collections from database
++            RoleCollectionCloudDAO roleCollectionCloudDAO = new RoleCollectionCloudDAO(activity);
++            positions.forEach(position -> {
++                if(position.getIndex() != -1) {
++                    // roleCollections.add(roleCollectionCloudDAO.retrieve(position.getRoleCollectionFirebaseID()));
++                    roleCollections.add(RoleCollectionLocalDAO.retrieve(databaseHelper, position.getRoleCollectionFirebaseID()));
++                }
++            });
++
++            // retrieve roles from database
++            roleCollections.forEach(rc -> roles.add(RoleLocalDAO.retrieve(databaseHelper, rc.getRoleID())));
++
++            // generate formation
++            RolePopulation.teamUnit(roles, teamRoles);
++
++            // unit buttons at the upper part
++            for(int i = 0; i < teamRoles.size(); i++) {
++                Entity role = teamRoles.get(i);
++                ImageButton unitImageBtn = activity.getFormations().get(i).findViewById(R.id.unitImageBtn);
++
++                if(role != null) {
++                    // set rating
++                    StarUtils.rewriteStar(activity.getFormations().get(i), role.getRating());
++                    executors.execute(new SetImageTask(activity, unitImageBtn, role.getRoleImage()));
++                    // executors.execute(new LoadUnitImageTask(activity, unitImageBtn, role.getRoleImage()));
++
++                    unitImageBtn.setOnClickListener(v -> {
++                        Intent intent = new Intent(activity.getApplicationContext(), RoleDescriptionActivity.class);
++                        intent.putExtra("name", role.getName());
++                        intent.putExtra("roleDescription", role.getDescription());
++                        intent.putExtra("roleImage", role.getRoleImage());
++                        intent.putExtra("rating", role.getRating());
++                        intent.putExtra("skillInfo", (Serializable) UnitUtils.setAndGetSkills(role.getSkillManager()));
++                        activity.startActivity(intent);
++                    });
++                }
++            }
++        });
++        // Formation mainFormation = FormationLocalDAO.retrieveFirstFormation(databaseHelper, user.getId());
++        /*
++
+         // set main header
+         setMainHeader(activity.getMainHeader(), user);
+ 
+         // retrieve positions from database
+-        positions.add(PositionLocalDAO.retrieve(databaseHelper, mainFormation.getPositionID_A()));
+-        positions.add(PositionLocalDAO.retrieve(databaseHelper, mainFormation.getPositionID_B()));
+-        positions.add(PositionLocalDAO.retrieve(databaseHelper, mainFormation.getPositionID_C()));
+-        positions.add(PositionLocalDAO.retrieve(databaseHelper, mainFormation.getPositionID_D()));
+-        positions.add(PositionLocalDAO.retrieve(databaseHelper, mainFormation.getPositionID_E()));
++        PositionCloudDAO positionCloudDAO = new PositionCloudDAO(activity);
++        positions.add(positionCloudDAO.retrieve(mainFormation.getPositionFirebaseID_A()));
++        positions.add(positionCloudDAO.retrieve(mainFormation.getPositionFirebaseID_B()));
++        positions.add(positionCloudDAO.retrieve(mainFormation.getPositionFirebaseID_C()));
++        positions.add(positionCloudDAO.retrieve(mainFormation.getPositionFirebaseID_D()));
++        positions.add(positionCloudDAO.retrieve(mainFormation.getPositionFirebaseID_E()));
+ 
+         // retrieve role collections from database
++        RoleCollectionCloudDAO roleCollectionCloudDAO = new RoleCollectionCloudDAO(activity);
+         positions.forEach(position -> {
+             if(position.getIndex() != -1) {
+-                roleCollections.add(RoleCollectionLocalDAO.retrieve(databaseHelper, user.getId(), position.getRoleCollectionID()));
++                roleCollections.add(roleCollectionCloudDAO.retrieve(position.getRoleCollectionFirebaseID()));
++                // roleCollections.add(RoleCollectionLocalDAO.retrieve(databaseHelper, user.getId(), position.getRoleCollectionID()));
+             }
+         });
+ 
+@@ -121,6 +177,8 @@
+                 });
+             }
+         }
++
++         */
+     }
+ 
+     // initialize function
+Index: app/src/main/java/com/example/autoraidrpg/controller/ArenaController.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/autoraidrpg/controller/ArenaController.java b/app/src/main/java/com/example/autoraidrpg/controller/ArenaController.java
+--- a/app/src/main/java/com/example/autoraidrpg/controller/ArenaController.java	
++++ b/app/src/main/java/com/example/autoraidrpg/controller/ArenaController.java	(date 1684604578628)
+@@ -7,9 +7,10 @@
+ import com.example.autoraidrpg.R;
+ import com.example.autoraidrpg.adapter.PreparationUnitInfoAdapter;
+ import com.example.autoraidrpg.database.DatabaseHelper;
+-import com.example.autoraidrpg.database.dao.local.FormationLocalDAO;
+-import com.example.autoraidrpg.database.dao.local.PositionLocalDAO;
+-import com.example.autoraidrpg.database.dao.local.RoleCollectionLocalDAO;
++import com.example.autoraidrpg.database.dao.cloud.FormationCloudDAO;
++import com.example.autoraidrpg.database.dao.cloud.PositionCloudDAO;
++import com.example.autoraidrpg.database.dao.cloud.RoleCollectionCloudDAO;
++import com.example.autoraidrpg.database.dao.cloud.UserCloudDAO;
+ import com.example.autoraidrpg.database.dao.local.RoleLocalDAO;
+ import com.example.autoraidrpg.database.dao.local.UserLocalDAO;
+ import com.example.autoraidrpg.map.Pvp;
+@@ -44,7 +45,7 @@
+     public void start() {
+         // retrieve authenticated user session
+         databaseHelper = new DatabaseHelper(activity.getApplicationContext());
+-        user = user(activity, databaseHelper);
++        user = user(activity);
+         users = UserLocalDAO.retrieveAll(databaseHelper);
+         setMainHeader(activity.getMainHeader(), user);
+         rpgMap.start();
+@@ -58,12 +59,13 @@
+ 
+         // retrieve authenticated user session
+         databaseHelper = new DatabaseHelper(activity.getApplicationContext());
+-        user = user(activity, databaseHelper);
++        user = user(activity);
+         users = UserLocalDAO.retrieveAll(databaseHelper);
+         setMainHeader(activity.getMainHeader(), user);
+ 
+         // get formations
+-        formations = FormationLocalDAO.all(databaseHelper, user.getId());
++        // formations = FormationLocalDAO.all(databaseHelper, user.getId());
++        formations = new FormationCloudDAO(activity).retrieveAll(user.getFirebaseID());
+         hasBeenSet = false;
+         AtomicInteger formationCount = new AtomicInteger(0);
+ 
+@@ -73,16 +75,28 @@
+ 
+             // get all positions
+             List<Position> positions = new ArrayList<>();
++            /*
+             positions.add(PositionLocalDAO.getByID(databaseHelper, formation.getPositionID_A()));
+             positions.add(PositionLocalDAO.getByID(databaseHelper, formation.getPositionID_B()));
+             positions.add(PositionLocalDAO.getByID(databaseHelper, formation.getPositionID_C()));
+             positions.add(PositionLocalDAO.getByID(databaseHelper, formation.getPositionID_D()));
+             positions.add(PositionLocalDAO.getByID(databaseHelper, formation.getPositionID_E()));
++             */
++            /*
++            PositionCloudDAO positionCloudDAO = new PositionCloudDAO(activity);
++            positions.add(positionCloudDAO.retrieve(formation.getPositionFirebaseID_A()));
++            positions.add(positionCloudDAO.retrieve(formation.getPositionFirebaseID_B()));
++            positions.add(positionCloudDAO.retrieve(formation.getPositionFirebaseID_C()));
++            positions.add(positionCloudDAO.retrieve(formation.getPositionFirebaseID_D()));
++            positions.add(positionCloudDAO.retrieve(formation.getPositionFirebaseID_E()));
++
++             */
+ 
+             // set role collections
+             List<RoleCollection> roleCollectionList = new ArrayList<>();
+             positions.forEach(position -> {
+-                if(position.getIndex() != -1) roleCollectionList.add(RoleCollectionLocalDAO.retrieve(databaseHelper, user.getId(), position.getRoleCollectionID()));
++                // if(position.getIndex() != -1) roleCollectionList.add(RoleCollectionLocalDAO.retrieve(databaseHelper, user.getId(), position.getRoleCollectionID()));
++                if(position.getIndex() != -1) roleCollectionList.add(new RoleCollectionCloudDAO(activity).retrieve(position.getRoleCollectionFirebaseID()));
+                 else roleCollectionList.add(null);
+             });
+ 
+@@ -131,7 +145,8 @@
+         activity.getSaveLocationBtn().setOnClickListener(v -> {
+             user.setLongitude(rpgMap.getNavigate().getCurrentLong());
+             user.setLatitude(rpgMap.getNavigate().getCurrentLat());
+-            UserLocalDAO.update(databaseHelper, user);
++            // UserLocalDAO.update(databaseHelper, user);
++            new UserCloudDAO(activity).put(user.getFirebaseID(), user);
+             Toast.makeText(activity, String.format("Your location was successfully updated. Longitude: %f, Latitude: %f", user.getLongitude(), user.getLatitude()), Toast.LENGTH_SHORT).show();
+         });
+ 
+Index: app/src/main/java/com/example/autoraidrpg/controller/LoginController.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/autoraidrpg/controller/LoginController.java b/app/src/main/java/com/example/autoraidrpg/controller/LoginController.java
+--- a/app/src/main/java/com/example/autoraidrpg/controller/LoginController.java	
++++ b/app/src/main/java/com/example/autoraidrpg/controller/LoginController.java	(date 1684606328659)
+@@ -8,6 +8,7 @@
+ import com.example.autoraidrpg.MainActivity;
+ import com.example.autoraidrpg.RegisterActivity;
+ import com.example.autoraidrpg.database.DatabaseHelper;
++import com.example.autoraidrpg.database.dao.cloud.UserCloudDAO;
+ import com.example.autoraidrpg.database.dao.local.UserLocalDAO;
+ import com.example.autoraidrpg.model.User;
+ 
+@@ -32,6 +33,7 @@
+             // retrieve user
+             DatabaseHelper databaseHelper = new DatabaseHelper(activity.getApplicationContext());
+             User user = UserLocalDAO.retrieve(databaseHelper, email);
++            // User user = new UserCloudDAO(activity).retrieveByEmail(email);
+ 
+             // validations
+             if(!TextUtils.isEmpty(email) || TextUtils.isEmpty(password)) {
+Index: app/src/main/java/com/example/autoraidrpg/controller/SkillController.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/autoraidrpg/controller/SkillController.java b/app/src/main/java/com/example/autoraidrpg/controller/SkillController.java
+--- a/app/src/main/java/com/example/autoraidrpg/controller/SkillController.java	
++++ b/app/src/main/java/com/example/autoraidrpg/controller/SkillController.java	(date 1684584984177)
+@@ -8,6 +8,7 @@
+ import com.example.autoraidrpg.SkillActivity;
+ import com.example.autoraidrpg.adapter.SkillBuyCardAdapter;
+ import com.example.autoraidrpg.database.DatabaseHelper;
++import com.example.autoraidrpg.database.dao.cloud.RoleCollectionCloudDAO;
+ import com.example.autoraidrpg.database.dao.local.RoleCollectionLocalDAO;
+ import com.example.autoraidrpg.gameplay.entity.Entity;
+ import com.example.autoraidrpg.gameplay.entity.role.RoleFactory;
+@@ -30,7 +31,7 @@
+     public void start() {
+         // retrieve authenticated user session
+         databaseHelper = new DatabaseHelper(activity.getApplicationContext());
+-        user = user(activity, databaseHelper);
++        user = user(activity);
+         setMainHeader(activity.getMainHeader(), user);
+     }
+ 
+@@ -40,18 +41,19 @@
+ 
+         // retrieve authenticated user session
+         databaseHelper = new DatabaseHelper(activity.getApplicationContext());
+-        user = user(activity, databaseHelper);
++        user = user(activity);
+ 
+         Intent intent = activity.getIntent();
+ 
+         // set values
+-        int roleCollectionID = intent.getIntExtra("roleCollectionID", 0);
++        String roleCollectionFirebaseID = intent.getStringExtra("roleCollectionFirebaseID");
+         String name = intent.getStringExtra("name");
+         int currentRating = intent.getIntExtra("rating", 0);
+         int currentLevel = intent.getIntExtra("level", 0);
+ 
+         activity.getLevel().setText("Level " + String.valueOf(currentLevel));
+-        RoleCollection roleCollection = RoleCollectionLocalDAO.retrieve(databaseHelper, user.getId(), roleCollectionID);
++        // RoleCollection roleCollection = RoleCollectionLocalDAO.retrieve(databaseHelper, user.getRole(), roleCollectionID);
++        RoleCollection roleCollection = new RoleCollectionCloudDAO(activity).retrieve(roleCollectionFirebaseID);
+ 
+         // set entity
+         entity = RoleFactory.makeRole(name).setLevel(currentLevel).setRating(currentRating);
+Index: app/src/main/java/com/example/autoraidrpg/controller/StageController.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/autoraidrpg/controller/StageController.java b/app/src/main/java/com/example/autoraidrpg/controller/StageController.java
+--- a/app/src/main/java/com/example/autoraidrpg/controller/StageController.java	
++++ b/app/src/main/java/com/example/autoraidrpg/controller/StageController.java	(date 1684585183569)
+@@ -6,6 +6,7 @@
+ import com.example.autoraidrpg.StageActivity;
+ import com.example.autoraidrpg.adapter.StageCardAdapter;
+ import com.example.autoraidrpg.database.DatabaseHelper;
++import com.example.autoraidrpg.database.dao.cloud.StageCloudDAO;
+ import com.example.autoraidrpg.database.dao.local.StageLocalDAO;
+ import com.example.autoraidrpg.model.Stage;
+ import com.example.autoraidrpg.model.User;
+@@ -23,8 +24,9 @@
+     public void start() {
+         // retrieve authenticated user session
+         DatabaseHelper databaseHelper = new DatabaseHelper(activity.getApplicationContext());
+-        User user = user(activity, databaseHelper);
+-        stage = StageLocalDAO.retrieve(databaseHelper, user.getId());
++        User user = user(activity);
++        // stage = StageLocalDAO.retrieve(databaseHelper, user.getId());
++        stage = new StageCloudDAO(activity).retrieveByUserID(user.getFirebaseID());
+         setAuthHeader(activity.getMainHeader(), "CURRENT: STAGE " + stage.getValue());
+         setRecyclerViews();
+     }
+Index: app/src/main/java/com/example/autoraidrpg/controller/BattleController.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/autoraidrpg/controller/BattleController.java b/app/src/main/java/com/example/autoraidrpg/controller/BattleController.java
+--- a/app/src/main/java/com/example/autoraidrpg/controller/BattleController.java	
++++ b/app/src/main/java/com/example/autoraidrpg/controller/BattleController.java	(date 1684591244170)
+@@ -11,6 +11,8 @@
+ import com.example.autoraidrpg.R;
+ import com.example.autoraidrpg.adapter.PreparationUnitInfoAdapter;
+ import com.example.autoraidrpg.database.DatabaseHelper;
++import com.example.autoraidrpg.database.dao.cloud.BagCloudDAO;
++import com.example.autoraidrpg.database.dao.cloud.InventoryCloudDAO;
+ import com.example.autoraidrpg.database.dao.local.BagLocalDAO;
+ import com.example.autoraidrpg.database.dao.local.InventoryLocalDAO;
+ import com.example.autoraidrpg.database.dao.local.ItemLocalDAO;
+@@ -67,7 +69,7 @@
+ 
+         // retrieve authenticated user session
+         databaseHelper = new DatabaseHelper(activity.getApplicationContext());
+-        user = user(activity, databaseHelper);
++        user = user(activity);
+ 
+         // set up names
+         preparedUnits = (List<PreparationUnitInfoAdapter>) intent.getSerializableExtra("preparedUnits");
+@@ -172,23 +174,25 @@
+             int rating = roleCollection.getRating();
+             unit.setLevel(level).setRating(rating);
+ 
++
+             // equip items
+-            Bag currentBag = BagLocalDAO.retrieve(databaseHelper, roleCollection.getId());
++            // Bag currentBag = BagLocalDAO.retrieve(databaseHelper, roleCollection.getId());
++            Bag currentBag = new BagCloudDAO(activity).retrieveByRoleCollectionID(roleCollection.getFirebaseID());
+             Inventory inventory = unit.getInventory();
+ 
+             // set existing items at the bag
+-            equipItem(inventory, currentBag.getInventoryID_A(), 0);
+-            equipItem(inventory, currentBag.getInventoryID_B(), 1);
+-            equipItem(inventory, currentBag.getInventoryID_C(), 2);
+-            equipItem(inventory, currentBag.getInventoryID_D(), 3);
+-            equipItem(inventory, currentBag.getInventoryID_E(), 4);
+-            equipItem(inventory, currentBag.getInventoryID_F(), 5);
+-            equipItem(inventory, currentBag.getInventoryID_G(), 6);
+-            equipItem(inventory, currentBag.getInventoryID_H(), 7);
+-            equipItem(inventory, currentBag.getInventoryID_I(), 8);
+-            equipItem(inventory, currentBag.getInventoryID_G(), 9);
+-            equipItem(inventory, currentBag.getInventoryID_K(), 10);
+-            equipItem(inventory, currentBag.getInventoryID_L(), 11);
++            equipItem(inventory, currentBag.getInventoryFirebaseID_A(), 0);
++            equipItem(inventory, currentBag.getInventoryFirebaseID_B(), 1);
++            equipItem(inventory, currentBag.getInventoryFirebaseID_C(), 2);
++            equipItem(inventory, currentBag.getInventoryFirebaseID_D(), 3);
++            equipItem(inventory, currentBag.getInventoryFirebaseID_E(), 4);
++            equipItem(inventory, currentBag.getInventoryFirebaseID_F(), 5);
++            equipItem(inventory, currentBag.getInventoryFirebaseID_G(), 6);
++            equipItem(inventory, currentBag.getInventoryFirebaseID_H(), 7);
++            equipItem(inventory, currentBag.getInventoryFirebaseID_I(), 8);
++            equipItem(inventory, currentBag.getInventoryFirebaseID_G(), 9);
++            equipItem(inventory, currentBag.getInventoryFirebaseID_K(), 10);
++            equipItem(inventory, currentBag.getInventoryFirebaseID_L(), 11);
+ 
+             unit.initStats();
+ 
+@@ -213,7 +217,7 @@
+ 
+         // battle
+         Battle battle = new Battle(allies, hostiles);
+-        battle.dao(databaseHelper, user);
++        battle.dao(activity, databaseHelper, user);
+         battle.setFinishedBiConsumer((result, reward) -> {
+             Intent intent = new Intent(activity.getApplicationContext(), BattleResultActivity.class);
+             intent.putExtra("result", result);
+@@ -235,8 +239,9 @@
+     }
+ 
+     // equip existing items
+-    private void equipItem(Inventory inventory, int inventoryID, int index) {
+-        com.example.autoraidrpg.model.Inventory tempInventory = InventoryLocalDAO.retrieve(databaseHelper, user.getId(), inventoryID);
++    private void equipItem(Inventory inventory, String inventoryFirebaseID, int index) {
++        // com.example.autoraidrpg.model.Inventory tempInventory = InventoryLocalDAO.retrieve(databaseHelper, user.getId(), inventoryID);
++        com.example.autoraidrpg.model.Inventory tempInventory = new InventoryCloudDAO(activity).retrieve(inventoryFirebaseID);
+ 
+         if(tempInventory != null) {
+             com.example.autoraidrpg.model.Item tempItem = ItemLocalDAO.retrieve(databaseHelper, tempInventory.getItemID());
+Index: app/src/main/java/com/example/autoraidrpg/controller/LandingController.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/autoraidrpg/controller/LandingController.java b/app/src/main/java/com/example/autoraidrpg/controller/LandingController.java
+--- a/app/src/main/java/com/example/autoraidrpg/controller/LandingController.java	
++++ b/app/src/main/java/com/example/autoraidrpg/controller/LandingController.java	(date 1684602052352)
+@@ -30,7 +30,6 @@
+     public void init() {
+         activity = (LandingActivity) view;
+         handler = new Handler();
+-        CloudDAO.init();
+         new Thread(this::startProgress).start();
+     }
+ 
+Index: app/src/main/java/com/example/autoraidrpg/controller/RoleBuyController.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/autoraidrpg/controller/RoleBuyController.java b/app/src/main/java/com/example/autoraidrpg/controller/RoleBuyController.java
+--- a/app/src/main/java/com/example/autoraidrpg/controller/RoleBuyController.java	
++++ b/app/src/main/java/com/example/autoraidrpg/controller/RoleBuyController.java	(date 1684584324276)
+@@ -10,6 +10,8 @@
+ import com.example.autoraidrpg.adapter.SkillCardAdapter;
+ import com.example.autoraidrpg.adapter.SkillInfoAdapter;
+ import com.example.autoraidrpg.database.DatabaseHelper;
++import com.example.autoraidrpg.database.dao.cloud.BagCloudDAO;
++import com.example.autoraidrpg.database.dao.cloud.RoleCollectionCloudDAO;
+ import com.example.autoraidrpg.database.dao.local.BagLocalDAO;
+ import com.example.autoraidrpg.database.dao.local.RoleCollectionLocalDAO;
+ import com.example.autoraidrpg.database.dao.local.RoleLocalDAO;
+@@ -41,7 +43,7 @@
+     @Override
+     public void start() {
+         // retrieve authenticated user session
+-        user = user(activity, databaseHelper);
++        user = user(activity);
+         setMainHeader(activity.getMainHeader(), user);
+     }
+ 
+@@ -52,7 +54,7 @@
+ 
+         // retrieve authenticated user session
+         databaseHelper = new DatabaseHelper(activity.getApplicationContext());
+-        user = user(activity, databaseHelper);
++        user = user(activity);
+         Intent intent = activity.getIntent();
+ 
+         // set values
+@@ -85,10 +87,12 @@
+ 
+                 // insert role collection
+                 Role role = RoleLocalDAO.retrieveByName(databaseHelper, name);
+-                RoleCollection roleCollection = new RoleCollection(-1, user.getId(), role.getId(), 1, 1, 1, 1, 1, 1, 1);
+-                int newRoleCollectionID = (int) RoleCollectionLocalDAO.store(databaseHelper, roleCollection);
+-                Bag bag = new Bag(-1, user.getId(), newRoleCollectionID, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1);
+-                BagLocalDAO.store(databaseHelper, bag);
++                RoleCollection roleCollection = new RoleCollection("NONE", user.getFirebaseID(), role.getId(), 1, 1, 1, 1, 1, 1, 1);
++                new RoleCollectionCloudDAO(activity).store(roleCollection);
++                // int newRoleCollectionID = (int) RoleCollectionLocalDAO.store(databaseHelper, roleCollection);
++                Bag bag = new Bag("NONE", user.getFirebaseID(), roleCollection.getFirebaseID(), "NONE", "NONE", "NONE", "NONE", "NONE", "NONE", "NONE", "NONE","NONE", "NONE", "NONE","NONE");
++                // BagLocalDAO.store(databaseHelper, bag);
++                new BagCloudDAO(activity).store(bag);
+ 
+                 // feedback
+                 alert(activity.getApplicationContext(), "You buy " + name + " with coins.");
+@@ -106,10 +110,11 @@
+ 
+                 // insert role collection
+                 Role role = RoleLocalDAO.retrieveByName(databaseHelper, name);
+-                RoleCollection roleCollection = new RoleCollection(-1, user.getId(), role.getId(), 1, 1, 1, 1, 1, 1, 1);
+-                int newRoleCollectionID = (int) RoleCollectionLocalDAO.store(databaseHelper, roleCollection);
+-                Bag bag = new Bag(-1, user.getId(), newRoleCollectionID, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1);
+-                BagLocalDAO.store(databaseHelper, bag);
++                RoleCollection roleCollection = new RoleCollection("NONE", user.getFirebaseID(), role.getId(), 1, 1, 1, 1, 1, 1, 1);
++                // int newRoleCollectionID = (int) RoleCollectionLocalDAO.store(databaseHelper, roleCollection);
++                Bag bag = new Bag("NONE", user.getFirebaseID(), roleCollection.getFirebaseID(), "NONE", "NONE", "NONE", "NONE", "NONE", "NONE", "NONE", "NONE","NONE", "NONE", "NONE","NONE");
++                // BagLocalDAO.store(databaseHelper, bag);
++                new BagCloudDAO(activity).store(bag);
+ 
+                 // feedback
+                 alert(activity.getApplicationContext(), "You buy " + name + " with diamonds.");
+Index: app/src/main/java/com/example/autoraidrpg/controller/ItemShopController.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/autoraidrpg/controller/ItemShopController.java b/app/src/main/java/com/example/autoraidrpg/controller/ItemShopController.java
+--- a/app/src/main/java/com/example/autoraidrpg/controller/ItemShopController.java	
++++ b/app/src/main/java/com/example/autoraidrpg/controller/ItemShopController.java	(date 1684583748229)
+@@ -29,7 +29,7 @@
+     @Override
+     public void start() {
+         // retrieve authenticated user session
+-        User user = user(activity, databaseHelper);
++        User user = user(activity);
+         setMainHeader(activity.getMainHeader(), user);
+     }
+ 
+Index: app/src/main/java/com/example/autoraidrpg/controller/RegisterController.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/autoraidrpg/controller/RegisterController.java b/app/src/main/java/com/example/autoraidrpg/controller/RegisterController.java
+--- a/app/src/main/java/com/example/autoraidrpg/controller/RegisterController.java	
++++ b/app/src/main/java/com/example/autoraidrpg/controller/RegisterController.java	(date 1684606544454)
+@@ -52,12 +52,11 @@
+                 DatabaseHelper databaseHelper = new DatabaseHelper(activity.getApplicationContext());
+                 User newUser = new User("NONE", username, email, BCrypt.hashpw(password, salt), longitude, latitude, coin, exp, diamond);
+ 
+-                // int newID = (int) UserLocalDAO.store(databaseHelper, newUser);
+-
+                 // set new id before storing it in the session
+                 UserCloudDAO userCloudDAO = new UserCloudDAO(activity);
+                 userCloudDAO.store(newUser);
+-                // newUser.setId((int) newID);
++                UserLocalDAO.store(databaseHelper, newUser);
++                Log.i("FIREBASE", newUser.toString());
+ 
+                 // store in session session
+                 session(activity, newUser);
+@@ -69,17 +68,16 @@
+                 RolePopulation.generate(databaseHelper);
+                 ItemPopulation.generate(databaseHelper);
+ 
+-                RoleCollection roleCollection = RolePopulation.generateFirstRole(activity, newUser.getFirebaseID());
++                RoleCollection roleCollection = RolePopulation.generateFirstRole(activity, databaseHelper, newUser.getFirebaseID());
+ 
+-                RolePopulation.generateFormation(activity, newUser.getFirebaseID(), roleCollection.getFirebaseID());
+-                ItemPopulation.seed(activity, newUser.getFirebaseID());
+-                StagePopulation.generate(activity, newUser.getFirebaseID());
++                RolePopulation.generateFormation(activity, databaseHelper, newUser.getFirebaseID(), roleCollection.getFirebaseID());
++                ItemPopulation.seed(activity, databaseHelper, newUser.getFirebaseID());
++                StagePopulation.generate(activity, databaseHelper, newUser.getFirebaseID());
+ 
+                 // create first unit bag
+                 Bag bag = new Bag("NONE", newUser.getFirebaseID(), roleCollection.getFirebaseID(), "NONE", "NONE", "NONE", "NONE", "NONE", "NONE", "NONE", "NONE", "NONE", "NONE", "NONE", "NONE");
+-                // int bagID = (int) BagLocalDAO.store(databaseHelper, bag);
+-                // bag.setId(bagID);
+                 new BagCloudDAO(activity).store(bag);
++                BagLocalDAO.store(databaseHelper, bag);
+ 
+                 // set intent to listener
+                 Intent intent = new Intent(activity.getApplicationContext(), MainActivity.class);
+Index: app/src/main/java/com/example/autoraidrpg/controller/RoleShopController.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/autoraidrpg/controller/RoleShopController.java b/app/src/main/java/com/example/autoraidrpg/controller/RoleShopController.java
+--- a/app/src/main/java/com/example/autoraidrpg/controller/RoleShopController.java	
++++ b/app/src/main/java/com/example/autoraidrpg/controller/RoleShopController.java	(date 1684584877340)
+@@ -28,7 +28,7 @@
+     @Override
+     public void start() {
+         // retrieve authenticated user session
+-        User user = user(activity, databaseHelper);
++        User user = user(activity);
+         setMainHeader(activity.getMainHeader(), user);
+     }
+ 
+Index: app/src/main/java/com/example/autoraidrpg/controller/ItemMergeController.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/autoraidrpg/controller/ItemMergeController.java b/app/src/main/java/com/example/autoraidrpg/controller/ItemMergeController.java
+--- a/app/src/main/java/com/example/autoraidrpg/controller/ItemMergeController.java	
++++ b/app/src/main/java/com/example/autoraidrpg/controller/ItemMergeController.java	(date 1684583692383)
+@@ -11,6 +11,7 @@
+ import com.example.autoraidrpg.MainActivity;
+ import com.example.autoraidrpg.R;
+ import com.example.autoraidrpg.database.DatabaseHelper;
++import com.example.autoraidrpg.database.dao.cloud.InventoryCloudDAO;
+ import com.example.autoraidrpg.database.dao.local.InventoryLocalDAO;
+ import com.example.autoraidrpg.database.dao.local.ItemLocalDAO;
+ import com.example.autoraidrpg.gameplay.bag.Item;
+@@ -40,7 +41,7 @@
+     @Override
+     public void start() {
+         // retrieve authenticated user session
+-        user = user(activity, databaseHelper);
++        user = user(activity);
+         setMainHeader(activity.getMainHeader(), user);
+     }
+ 
+@@ -48,7 +49,7 @@
+     public void init() {
+         activity = (ItemMergeActivity) view;
+         databaseHelper = new DatabaseHelper(activity.getApplicationContext());
+-        user = user(activity, databaseHelper);
++        user = user(activity);
+ 
+         intent = activity.getIntent();
+         itemNames = new ArrayList<>();
+@@ -57,7 +58,8 @@
+ 
+         // set values
+         Item item = (Item) intent.getSerializableExtra("item");
+-        List<Inventory> inventories = InventoryLocalDAO.all(databaseHelper, user.getId());
++        // List<Inventory> inventories = InventoryLocalDAO.all(databaseHelper, user.getId());
++        List<Inventory> inventories = new InventoryCloudDAO(activity).retrieveAll(user.getFirebaseID());
+         List<com.example.autoraidrpg.model.Item> currentItems = ItemLocalDAO.allByInventory(databaseHelper, inventories);
+         ItemPopulation.itemCollection(currentItems, availableItems);
+ 
+Index: app/src/main/java/com/example/autoraidrpg/controller/RoleMergeController.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/autoraidrpg/controller/RoleMergeController.java b/app/src/main/java/com/example/autoraidrpg/controller/RoleMergeController.java
+--- a/app/src/main/java/com/example/autoraidrpg/controller/RoleMergeController.java	
++++ b/app/src/main/java/com/example/autoraidrpg/controller/RoleMergeController.java	(date 1684584860187)
+@@ -44,7 +44,7 @@
+     public void start() {
+         // retrieve authenticated user session
+         DatabaseHelper databaseHelper = new DatabaseHelper(activity.getApplicationContext());
+-        User user = user(activity, databaseHelper);
++        User user = user(activity);
+         setMainHeader(activity.getMainHeader(), user);
+     }
+ 
+Index: app/src/main/java/com/example/autoraidrpg/controller/DiamondShopController.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/autoraidrpg/controller/DiamondShopController.java b/app/src/main/java/com/example/autoraidrpg/controller/DiamondShopController.java
+--- a/app/src/main/java/com/example/autoraidrpg/controller/DiamondShopController.java	
++++ b/app/src/main/java/com/example/autoraidrpg/controller/DiamondShopController.java	(date 1684588177370)
+@@ -22,7 +22,7 @@
+     public void start() {
+         // retrieve authenticated user session
+         DatabaseHelper databaseHelper = new DatabaseHelper(activity.getApplicationContext());
+-        User user = user(activity, databaseHelper);
++        User user = user(activity);
+         setMainHeader(activity.getMainHeader(), user);
+     }
+ 
+Index: app/src/main/java/com/example/autoraidrpg/controller/ItemSettingController.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/autoraidrpg/controller/ItemSettingController.java b/app/src/main/java/com/example/autoraidrpg/controller/ItemSettingController.java
+--- a/app/src/main/java/com/example/autoraidrpg/controller/ItemSettingController.java	
++++ b/app/src/main/java/com/example/autoraidrpg/controller/ItemSettingController.java	(date 1684583459001)
+@@ -15,6 +15,9 @@
+ import com.example.autoraidrpg.R;
+ import com.example.autoraidrpg.adapter.ItemCardAdapter;
+ import com.example.autoraidrpg.database.DatabaseHelper;
++import com.example.autoraidrpg.database.dao.cloud.BagCloudDAO;
++import com.example.autoraidrpg.database.dao.cloud.InventoryCloudDAO;
++import com.example.autoraidrpg.database.dao.cloud.RoleCollectionCloudDAO;
+ import com.example.autoraidrpg.database.dao.local.BagLocalDAO;
+ import com.example.autoraidrpg.database.dao.local.InventoryLocalDAO;
+ import com.example.autoraidrpg.database.dao.local.ItemLocalDAO;
+@@ -53,8 +56,8 @@
+     private ExecutorService executor;
+     private DatabaseHelper databaseHelper;
+     private User user;
+-    private String name;
+-    private int roleCollectionID, currentLevel, currentRating;
++    private String name, roleCollectionFirebaseID;
++    private int currentLevel, currentRating;
+     private List<com.example.autoraidrpg.model.Inventory> inventories;
+     private List<com.example.autoraidrpg.model.Item> storedItems;
+ 
+@@ -72,12 +75,14 @@
+         index = 0;
+ 
+         // retrieve authenticated user session
+-        user = user(activity, databaseHelper);
++        user = user(activity);
+         setMainHeader(activity.getMainHeader(), user);
+ 
+         // set values
+-        RoleCollection roleCollection = RoleCollectionLocalDAO.retrieve(databaseHelper, user.getId(), roleCollectionID);
+-        currentBag = BagLocalDAO.retrieve(databaseHelper, roleCollectionID);
++        // RoleCollection roleCollection = RoleCollectionLocalDAO.retrieve(databaseHelper, user.getId(), roleCollectionID);
++        RoleCollection roleCollection = new RoleCollectionCloudDAO(activity).retrieve(roleCollectionFirebaseID);
++        // currentBag = BagLocalDAO.retrieve(databaseHelper, roleCollectionID);
++        currentBag = new BagCloudDAO(activity).retrieveByRoleCollectionID(roleCollectionFirebaseID);
+ 
+         // set entity & inventory
+         entity = RoleFactory.makeRole(name).setLevel(currentLevel).setRating(currentRating);
+@@ -103,21 +108,24 @@
+ 
+         // retrieve authenticated user session
+         databaseHelper = new DatabaseHelper(activity.getApplicationContext());
+-        user = user(activity, databaseHelper);
+-        inventories = InventoryLocalDAO.all(databaseHelper, user.getId());
++        user = user(activity);
++        // inventories = InventoryLocalDAO.all(databaseHelper, user.getId());
++        inventories = new InventoryCloudDAO(activity).retrieveAll(user.getFirebaseID());
+         storedItems = ItemLocalDAO.allByInventory(databaseHelper, inventories);
+ 
+         Intent intent = activity.getIntent();
+ 
+         // set values
+-        roleCollectionID = intent.getIntExtra("roleCollectionID", 0);
++        roleCollectionFirebaseID = intent.getStringExtra("roleCollectionFirebaseID");
+         name = intent.getStringExtra("name");
+         currentRating = intent.getIntExtra("rating", 0);
+         currentLevel = intent.getIntExtra("level", 0);
+ 
+         activity.getLevel().setText("Level " + String.valueOf(currentLevel));
+-        RoleCollection roleCollection = RoleCollectionLocalDAO.retrieve(databaseHelper, user.getId(), roleCollectionID);
+-        currentBag = BagLocalDAO.retrieve(databaseHelper, roleCollectionID);
++        // RoleCollection roleCollection = RoleCollectionLocalDAO.retrieve(databaseHelper, user.getId(), roleCollectionID);
++        RoleCollection roleCollection = new RoleCollectionCloudDAO(activity).retrieve(roleCollectionFirebaseID);
++        // currentBag = BagLocalDAO.retrieve(databaseHelper, roleCollectionID);
++        currentBag = new BagCloudDAO(activity).retrieveByRoleCollectionID(roleCollectionFirebaseID);
+ 
+         // set entity & inventory
+         entity = RoleFactory.makeRole(name).setLevel(currentLevel).setRating(currentRating);
+@@ -175,23 +183,24 @@
+         itemSlots.add(activity.findViewById(R.id.itemSlot12));
+ 
+         // set existing items at the bag
+-        setEquippedItem(currentBag.getInventoryID_A(), 0);
+-        setEquippedItem(currentBag.getInventoryID_B(), 1);
+-        setEquippedItem(currentBag.getInventoryID_C(), 2);
+-        setEquippedItem(currentBag.getInventoryID_D(), 3);
+-        setEquippedItem(currentBag.getInventoryID_E(), 4);
+-        setEquippedItem(currentBag.getInventoryID_F(), 5);
+-        setEquippedItem(currentBag.getInventoryID_G(), 6);
+-        setEquippedItem(currentBag.getInventoryID_H(), 7);
+-        setEquippedItem(currentBag.getInventoryID_I(), 8);
+-        setEquippedItem(currentBag.getInventoryID_G(), 9);
+-        setEquippedItem(currentBag.getInventoryID_K(), 10);
+-        setEquippedItem(currentBag.getInventoryID_L(), 11);
++        setEquippedItem(currentBag.getInventoryFirebaseID_A(), 0);
++        setEquippedItem(currentBag.getInventoryFirebaseID_B(), 1);
++        setEquippedItem(currentBag.getInventoryFirebaseID_C(), 2);
++        setEquippedItem(currentBag.getInventoryFirebaseID_D(), 3);
++        setEquippedItem(currentBag.getInventoryFirebaseID_E(), 4);
++        setEquippedItem(currentBag.getInventoryFirebaseID_F(), 5);
++        setEquippedItem(currentBag.getInventoryFirebaseID_G(), 6);
++        setEquippedItem(currentBag.getInventoryFirebaseID_H(), 7);
++        setEquippedItem(currentBag.getInventoryFirebaseID_I(), 8);
++        setEquippedItem(currentBag.getInventoryFirebaseID_G(), 9);
++        setEquippedItem(currentBag.getInventoryFirebaseID_K(), 10);
++        setEquippedItem(currentBag.getInventoryFirebaseID_L(), 11);
+     }
+ 
+     // set existing items in the bag
+-    private void setEquippedItem(int inventoryID, int index) {
+-        com.example.autoraidrpg.model.Inventory tempInventory = InventoryLocalDAO.retrieve(databaseHelper, user.getId(), inventoryID);
++    private void setEquippedItem(String inventoryFirebaseID, int index) {
++        // com.example.autoraidrpg.model.Inventory tempInventory = InventoryLocalDAO.retrieve(databaseHelper, user.getId(), inventoryID);
++        com.example.autoraidrpg.model.Inventory tempInventory = new InventoryCloudDAO(activity).retrieve(inventoryFirebaseID);
+ 
+         if(tempInventory != null) {
+             com.example.autoraidrpg.model.Item tempItem = ItemLocalDAO.retrieve(databaseHelper, tempInventory.getItemID());
+@@ -209,13 +218,15 @@
+     }
+ 
+     // set item to bag
+-    private void putToBag(int inventoryID, int index) {
+-        BagLocalDAO.put(databaseHelper, currentBag.getId(), inventoryID, index);
++    private void putToBag(String inventoryFirebaseID, int index) {
++        // BagLocalDAO.put(databaseHelper, currentBag.getId(), inventoryID, index);
++        new BagCloudDAO(activity).put(currentBag.getFirebaseID(), inventoryFirebaseID, index);
+     }
+ 
+     // remove item in bag
+     private void removeToBag(int index) {
+-        BagLocalDAO.put(databaseHelper, currentBag.getId(), -1, index);
++        // BagLocalDAO.put(databaseHelper, currentBag.getId(), -1, index);
++        new BagCloudDAO(activity).put(currentBag.getFirebaseID(), "NONE", index);
+     }
+ 
+     private void setOnClickListeners() {
+@@ -252,7 +263,7 @@
+             emptyItemBtn.setOnClickListener(new OnClickEquippedItemListener(itemArray[index], index));
+ 
+             // update
+-            putToBag(item.getInventoryID(), index);
++            putToBag(item.getInventoryFirebaseID(), index);
+         } else {
+             Toast toast = Toast.makeText(activity.getApplicationContext(),
+                     String.format("%s already exists in the equipped bag!", item.getName()), Toast.LENGTH_SHORT);
+Index: app/src/main/java/com/example/autoraidrpg/controller/ItemCollectionController.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/autoraidrpg/controller/ItemCollectionController.java b/app/src/main/java/com/example/autoraidrpg/controller/ItemCollectionController.java
+--- a/app/src/main/java/com/example/autoraidrpg/controller/ItemCollectionController.java	
++++ b/app/src/main/java/com/example/autoraidrpg/controller/ItemCollectionController.java	(date 1684580990023)
+@@ -11,6 +11,7 @@
+ import com.example.autoraidrpg.ItemMergeActivity;
+ import com.example.autoraidrpg.adapter.ItemCardAdapter;
+ import com.example.autoraidrpg.database.DatabaseHelper;
++import com.example.autoraidrpg.database.dao.cloud.InventoryCloudDAO;
+ import com.example.autoraidrpg.database.dao.local.InventoryLocalDAO;
+ import com.example.autoraidrpg.database.dao.local.ItemLocalDAO;
+ import com.example.autoraidrpg.gameplay.bag.Item;
+@@ -46,9 +47,9 @@
+ 
+         // retrieve authenticated user session
+         databaseHelper = new DatabaseHelper(activity.getApplicationContext());
+-        user = user(activity, databaseHelper);
++        user = user(activity);
+ 
+-        List<Inventory> inventories = InventoryLocalDAO.all(databaseHelper, user.getId());
++        List<Inventory> inventories = new InventoryCloudDAO(activity).retrieveAll(user.getFirebaseID());
+         List<com.example.autoraidrpg.model.Item> storedItems = ItemLocalDAO.allByInventory(databaseHelper, inventories);
+ 
+         ItemPopulation.itemCollection(storedItems, items);
+Index: app/src/main/java/com/example/autoraidrpg/controller/RoleCollectionController.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/autoraidrpg/controller/RoleCollectionController.java b/app/src/main/java/com/example/autoraidrpg/controller/RoleCollectionController.java
+--- a/app/src/main/java/com/example/autoraidrpg/controller/RoleCollectionController.java	
++++ b/app/src/main/java/com/example/autoraidrpg/controller/RoleCollectionController.java	(date 1684584599183)
+@@ -7,6 +7,7 @@
+ import com.example.autoraidrpg.RoleCollectionActivity;
+ import com.example.autoraidrpg.adapter.RoleCardAdapter;
+ import com.example.autoraidrpg.database.DatabaseHelper;
++import com.example.autoraidrpg.database.dao.cloud.RoleCollectionCloudDAO;
+ import com.example.autoraidrpg.database.dao.local.RoleCollectionLocalDAO;
+ import com.example.autoraidrpg.database.dao.local.RoleLocalDAO;
+ import com.example.autoraidrpg.gameplay.entity.Entity;
+@@ -33,11 +34,12 @@
+     public void start() {
+         // retrieve authenticated user session
+         DatabaseHelper databaseHelper = new DatabaseHelper(activity.getApplicationContext());
+-        User user = user(activity, databaseHelper);
++        User user = user(activity);
+         setMainHeader(activity.getMainHeader(), user);
+ 
+         entities.clear(); // clear the previous list first
+-        List<RoleCollection> roleCollections = RoleCollectionLocalDAO.all(databaseHelper, user.getId());
++        // List<RoleCollection> roleCollections = RoleCollectionLocalDAO.all(databaseHelper, user.getId());
++        List<RoleCollection> roleCollections = new RoleCollectionCloudDAO(activity).retrieveAll(user.getFirebaseID());
+         List<Role> roles = RoleLocalDAO.allByRoleCollections(databaseHelper, roleCollections);
+ 
+         // set entities
+Index: app/src/main/java/com/example/autoraidrpg/controller/BattleFormationController.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/autoraidrpg/controller/BattleFormationController.java b/app/src/main/java/com/example/autoraidrpg/controller/BattleFormationController.java
+--- a/app/src/main/java/com/example/autoraidrpg/controller/BattleFormationController.java	
++++ b/app/src/main/java/com/example/autoraidrpg/controller/BattleFormationController.java	(date 1684604592559)
+@@ -19,6 +19,11 @@
+ import com.example.autoraidrpg.adapter.PreparationUnitInfoAdapter;
+ import com.example.autoraidrpg.adapter.SkillCardAdapter;
+ import com.example.autoraidrpg.database.DatabaseHelper;
++import com.example.autoraidrpg.database.dao.cloud.BagCloudDAO;
++import com.example.autoraidrpg.database.dao.cloud.FormationCloudDAO;
++import com.example.autoraidrpg.database.dao.cloud.InventoryCloudDAO;
++import com.example.autoraidrpg.database.dao.cloud.PositionCloudDAO;
++import com.example.autoraidrpg.database.dao.cloud.RoleCollectionCloudDAO;
+ import com.example.autoraidrpg.database.dao.local.BagLocalDAO;
+ import com.example.autoraidrpg.database.dao.local.FormationLocalDAO;
+ import com.example.autoraidrpg.database.dao.local.InventoryLocalDAO;
+@@ -90,7 +95,7 @@
+ 
+         // retrieve authenticated user session
+         databaseHelper = new DatabaseHelper(activity.getApplicationContext());
+-        user = user(activity, databaseHelper);
++        user = user(activity);
+         setAuthHeader(activity.getMainHeader(), "Prepare for Battle! Set up your OWN formation!");
+ 
+         // entities & views
+@@ -100,7 +105,8 @@
+         frontlinerViews = new ArrayList<>();
+         backlinerViews = new ArrayList<>();
+ 
+-        roleCollections = RoleCollectionLocalDAO.all(databaseHelper, user.getId());
++        // roleCollections = RoleCollectionLocalDAO.all(databaseHelper, user.getId());
++        roleCollections = new RoleCollectionCloudDAO(activity).retrieveAll(user.getFirebaseID());
+         roles = RoleLocalDAO.allByRoleCollections(databaseHelper, roleCollections);
+         RolePopulation.roleCollection(roles, entities);
+ 
+@@ -111,30 +117,33 @@
+             Entity tempEntity = entities.get(rcIndex.getAndIncrement());
+             tempEntity.setLevel(rc.getLevel()).setRating(rc.getRating());
+ 
++
+             // equip items
+-            Bag currentBag = BagLocalDAO.retrieve(databaseHelper, rc.getId());
++            // Bag currentBag = BagLocalDAO.retrieve(databaseHelper, roleCollection.getId());
++            Bag currentBag = new BagCloudDAO(activity).retrieveByRoleCollectionID(rc.getFirebaseID());
+             Inventory inventory = tempEntity.getInventory();
+ 
+             // set existing items at the bag
+-            equipItem(inventory, currentBag.getInventoryID_A(), 0);
+-            equipItem(inventory, currentBag.getInventoryID_B(), 1);
+-            equipItem(inventory, currentBag.getInventoryID_C(), 2);
+-            equipItem(inventory, currentBag.getInventoryID_D(), 3);
+-            equipItem(inventory, currentBag.getInventoryID_E(), 4);
+-            equipItem(inventory, currentBag.getInventoryID_F(), 5);
+-            equipItem(inventory, currentBag.getInventoryID_G(), 6);
+-            equipItem(inventory, currentBag.getInventoryID_H(), 7);
+-            equipItem(inventory, currentBag.getInventoryID_I(), 8);
+-            equipItem(inventory, currentBag.getInventoryID_G(), 9);
+-            equipItem(inventory, currentBag.getInventoryID_K(), 10);
+-            equipItem(inventory, currentBag.getInventoryID_L(), 11);
++            equipItem(inventory, currentBag.getInventoryFirebaseID_A(), 0);
++            equipItem(inventory, currentBag.getInventoryFirebaseID_B(), 1);
++            equipItem(inventory, currentBag.getInventoryFirebaseID_C(), 2);
++            equipItem(inventory, currentBag.getInventoryFirebaseID_D(), 3);
++            equipItem(inventory, currentBag.getInventoryFirebaseID_E(), 4);
++            equipItem(inventory, currentBag.getInventoryFirebaseID_F(), 5);
++            equipItem(inventory, currentBag.getInventoryFirebaseID_G(), 6);
++            equipItem(inventory, currentBag.getInventoryFirebaseID_H(), 7);
++            equipItem(inventory, currentBag.getInventoryFirebaseID_I(), 8);
++            equipItem(inventory, currentBag.getInventoryFirebaseID_G(), 9);
++            equipItem(inventory, currentBag.getInventoryFirebaseID_K(), 10);
++            equipItem(inventory, currentBag.getInventoryFirebaseID_L(), 11);
+ 
+             tempEntity.initStats();
+         });
+         // OrderUtils.sortByNames(entities);
+ 
+         // retrieve battle formation
+-        formations = FormationLocalDAO.all(databaseHelper, user.getId());
++        // formations = FormationLocalDAO.all(databaseHelper, user.getId());
++        formations = new FormationCloudDAO(activity).retrieveAll(user.getFirebaseID());
+         AtomicInteger formationCount = new AtomicInteger(0);
+ 
+         // formation retrieval functionality
+@@ -143,16 +152,28 @@
+ 
+             // get all positions
+             List<Position> positions = new ArrayList<>();
++            /*
+             positions.add(PositionLocalDAO.getByID(databaseHelper, formation.getPositionID_A()));
+             positions.add(PositionLocalDAO.getByID(databaseHelper, formation.getPositionID_B()));
+             positions.add(PositionLocalDAO.getByID(databaseHelper, formation.getPositionID_C()));
+             positions.add(PositionLocalDAO.getByID(databaseHelper, formation.getPositionID_D()));
+             positions.add(PositionLocalDAO.getByID(databaseHelper, formation.getPositionID_E()));
++             */
++            /*
++            PositionCloudDAO positionCloudDAO = new PositionCloudDAO(activity);
++            positions.add(positionCloudDAO.retrieve(formation.getPositionFirebaseID_A()));
++            positions.add(positionCloudDAO.retrieve(formation.getPositionFirebaseID_B()));
++            positions.add(positionCloudDAO.retrieve(formation.getPositionFirebaseID_C()));
++            positions.add(positionCloudDAO.retrieve(formation.getPositionFirebaseID_D()));
++            positions.add(positionCloudDAO.retrieve(formation.getPositionFirebaseID_E()));
++
++             */
+ 
+             // set role collections
+             List<RoleCollection> roleCollectionList = new ArrayList<>();
+             positions.forEach(position -> {
+-                if(position.getIndex() != -1) roleCollectionList.add(RoleCollectionLocalDAO.retrieve(databaseHelper, user.getId(), position.getRoleCollectionID()));
++                // if(position.getIndex() != -1) roleCollectionList.add(RoleCollectionLocalDAO.retrieve(databaseHelper, user.getId(), position.getRoleCollectionID()));
++                if(position.getIndex() != -1) roleCollectionList.add(new RoleCollectionCloudDAO(activity).retrieve(position.getRoleCollectionFirebaseID()));
+                 else roleCollectionList.add(null);
+             });
+ 
+@@ -208,8 +229,9 @@
+     }
+ 
+     // equip existing items
+-    private void equipItem(Inventory inventory, int inventoryID, int index) {
+-        com.example.autoraidrpg.model.Inventory tempInventory = InventoryLocalDAO.retrieve(databaseHelper, user.getId(), inventoryID);
++    private void equipItem(Inventory inventory, String inventoryFirebaseID, int index) {
++        // com.example.autoraidrpg.model.Inventory tempInventory = InventoryLocalDAO.retrieve(databaseHelper, user.getId(), inventoryID);
++        com.example.autoraidrpg.model.Inventory tempInventory = new InventoryCloudDAO(activity).retrieve(inventoryFirebaseID);
+ 
+         if(tempInventory != null) {
+             com.example.autoraidrpg.model.Item tempItem = ItemLocalDAO.retrieve(databaseHelper, tempInventory.getItemID());
+@@ -351,7 +373,7 @@
+ 
+                     // set new entity in the battle formation
+                     mapNames.put(currentEntity.getName(), new PreparationUnitInfoAdapter(
+-                            currentRole, currentRoleCollection, new Position(-1, currentRoleCollection.getId(), index, front))
++                            currentRole, currentRoleCollection, new Position("NONE", currentRoleCollection.getFirebaseID(), index, front))
+                     );
+ 
+                     // set event when the slot has unit for erasure
+@@ -395,11 +417,22 @@
+ 
+         // get all positions
+         List<Position> positions = new ArrayList<>();
++        /*
+         positions.add(PositionLocalDAO.getByID(databaseHelper, currentFormation.getPositionID_A()));
+         positions.add(PositionLocalDAO.getByID(databaseHelper, currentFormation.getPositionID_B()));
+         positions.add(PositionLocalDAO.getByID(databaseHelper, currentFormation.getPositionID_C()));
+         positions.add(PositionLocalDAO.getByID(databaseHelper, currentFormation.getPositionID_D()));
+         positions.add(PositionLocalDAO.getByID(databaseHelper, currentFormation.getPositionID_E()));
++         */
++        /*
++        PositionCloudDAO positionCloudDAO = new PositionCloudDAO(activity);
++        positions.add(positionCloudDAO.retrieve(currentFormation.getPositionFirebaseID_A()));
++        positions.add(positionCloudDAO.retrieve(currentFormation.getPositionFirebaseID_B()));
++        positions.add(positionCloudDAO.retrieve(currentFormation.getPositionFirebaseID_C()));
++        positions.add(positionCloudDAO.retrieve(currentFormation.getPositionFirebaseID_D()));
++        positions.add(positionCloudDAO.retrieve(currentFormation.getPositionFirebaseID_E()));
++
++         */
+ 
+         // set preparation unit adapter
+         List<PreparationUnitInfoAdapter> values = new ArrayList<>(mapNames.values());
+@@ -409,11 +442,15 @@
+             try {
+                 PreparationUnitInfoAdapter unitAdapter = values.get(i);
+                 position = unitAdapter.getPosition();
+-                position.setId(positions.get(i).getId());
+-                PositionLocalDAO.update(databaseHelper, position);
++                position.setFirebaseID(positions.get(i).getFirebaseID());
++                // PositionLocalDAO.update(databaseHelper, position);
++                new PositionCloudDAO(activity).put(position.getFirebaseID(), position);
+             } catch (IndexOutOfBoundsException ex) {
+                 position = positions.get(i);
+-                PositionLocalDAO.updateEmpty(databaseHelper, position.getId(), position.getRoleCollectionID());
++                position.setIndex(-1);
++                position.setFront(false);
++                // PositionLocalDAO.updateEmpty(databaseHelper, position.getId(), position.getRoleCollectionID());
++                new PositionCloudDAO(activity).put(position.getFirebaseID(), position);
+             }
+         }
+ 
+Index: app/src/main/java/com/example/autoraidrpg/controller/PurchaseDiamondController.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/autoraidrpg/controller/PurchaseDiamondController.java b/app/src/main/java/com/example/autoraidrpg/controller/PurchaseDiamondController.java
+--- a/app/src/main/java/com/example/autoraidrpg/controller/PurchaseDiamondController.java	
++++ b/app/src/main/java/com/example/autoraidrpg/controller/PurchaseDiamondController.java	(date 1684583778852)
+@@ -17,7 +17,7 @@
+     public void start() {
+         // retrieve authenticated user session
+         DatabaseHelper databaseHelper = new DatabaseHelper(activity.getApplicationContext());
+-        User user = user(activity, databaseHelper);
++        User user = user(activity);
+         setMainHeader(activity.getMainHeader(), user);
+     }
+ 
+Index: app/src/main/java/com/example/autoraidrpg/controller/RoleDescriptionController.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/autoraidrpg/controller/RoleDescriptionController.java b/app/src/main/java/com/example/autoraidrpg/controller/RoleDescriptionController.java
+--- a/app/src/main/java/com/example/autoraidrpg/controller/RoleDescriptionController.java	
++++ b/app/src/main/java/com/example/autoraidrpg/controller/RoleDescriptionController.java	(date 1684584824839)
+@@ -38,7 +38,7 @@
+ 
+     @Override
+     public void start() {
+-        user = user(activity, databaseHelper);
++        user = user(activity);
+         setMainHeader(activity.getMainHeader(), user);
+     }
+ 
+@@ -49,7 +49,7 @@
+ 
+         // retrieve authenticated user session
+         databaseHelper = new DatabaseHelper(activity.getApplicationContext());
+-        user = user(activity, databaseHelper);
++        user = user(activity);
+ 
+         Intent intent = activity.getIntent();
+ 
+@@ -57,7 +57,7 @@
+         String name = intent.getStringExtra("name");
+         String roleDescription = intent.getStringExtra("roleDescription");
+ 
+-        int roleCollectionID = intent.getIntExtra("roleCollectionID", 0);
++        String roleCollectionFirebaseID = intent.getStringExtra("roleCollectionFirebaseID");
+         int roleID = intent.getIntExtra("roleID", 0);
+         int roleImage = intent.getIntExtra("roleImage", 0);
+         int level = intent.getIntExtra("level", 0);
+@@ -65,14 +65,14 @@
+ 
+         skillInfo = (List<SkillInfoAdapter>) intent.getSerializableExtra("skillInfo");
+         RoleCollection roleCollection = new RoleCollection(
+-                roleCollectionID, user.getId(), roleID, level, rating,
++                roleCollectionFirebaseID, user.getFirebaseID(), roleID, level, rating,
+                 skillInfo.get(0).getLevel(), skillInfo.get(1).getLevel(), skillInfo.get(2).getLevel(), skillInfo.get(3).getLevel(), skillInfo.get(4).getLevel()
+         );
+ 
+         // set buttons
+         activity.getInventoryBtn().setOnClickListener(v -> {
+             Intent nextIntent = new Intent(activity.getApplicationContext(), ItemSettingActivity.class);
+-            nextIntent.putExtra("roleCollectionID", roleCollection.getId());
++            nextIntent.putExtra("roleCollectionFirebaseID", roleCollection.getFirebaseID());
+             nextIntent.putExtra("name", name);
+             nextIntent.putExtra("rating", roleCollection.getRating());
+             nextIntent.putExtra("level", roleCollection.getLevel());
+@@ -102,7 +102,7 @@
+ 
+         activity.getSkillUpBtn().setOnClickListener(v -> {
+             Intent nextIntent = new Intent(activity.getApplicationContext(), SkillActivity.class);
+-            nextIntent.putExtra("roleCollectionID", roleCollection.getId());
++            nextIntent.putExtra("roleCollectionFirebaseID", roleCollection.getFirebaseID());
+             nextIntent.putExtra("name", name);
+             nextIntent.putExtra("rating", roleCollection.getRating());
+             nextIntent.putExtra("level", roleCollection.getLevel());
+Index: app/src/main/java/com/example/autoraidrpg/population/ItemPopulation.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/autoraidrpg/population/ItemPopulation.java b/app/src/main/java/com/example/autoraidrpg/population/ItemPopulation.java
+--- a/app/src/main/java/com/example/autoraidrpg/population/ItemPopulation.java	
++++ b/app/src/main/java/com/example/autoraidrpg/population/ItemPopulation.java	(date 1684606101022)
+@@ -3,6 +3,7 @@
+ import android.content.Context;
+ import android.database.sqlite.SQLiteOpenHelper;
+ 
++import com.example.autoraidrpg.database.DatabaseHelper;
+ import com.example.autoraidrpg.database.dao.cloud.InventoryCloudDAO;
+ import com.example.autoraidrpg.database.dao.local.InventoryLocalDAO;
+ import com.example.autoraidrpg.database.dao.local.ItemLocalDAO;
+@@ -46,22 +47,18 @@
+         }
+     }
+ 
+-    public static void seed(Context context, String userFirebaseID) {
++    public static void seed(Context context, DatabaseHelper dbHelper, String userFirebaseID) {
+         Inventory inventory1 = new Inventory("NONE", userFirebaseID, 1, 1);
+         Inventory inventory2 = new Inventory("NONE", userFirebaseID, 2, 1);
+ 
+-        // local
+-        /*
+-        int inventoryID1 = (int) InventoryLocalDAO.store(dbHelper, inventory1);
+-        int inventoryID2 = (int) InventoryLocalDAO.store(dbHelper, inventory2);
+-        inventory1.setId(inventoryID1);
+-        inventory2.setId(inventoryID2);
+-         */
+-
+         // cloud
+         InventoryCloudDAO inventoryCloudDAO = new InventoryCloudDAO(context);
+         inventoryCloudDAO.store(inventory1);
+         inventoryCloudDAO.store(inventory2);
++
++        // local
++        InventoryLocalDAO.store(dbHelper, inventory1);
++        InventoryLocalDAO.store(dbHelper, inventory2);
+     }
+ 
+     public static void itemCollection(List<com.example.autoraidrpg.model.Item> storedItems, List<Item> items) {
+@@ -71,8 +68,8 @@
+     public static void itemCollection(List<com.example.autoraidrpg.model.Item> storedItems, List<Item> items, List<Inventory> inventories) {
+         AtomicInteger index = new AtomicInteger(0);
+         storedItems.stream().forEach(storedItem -> {
+-            items.add(ItemFactory.makeItem(storedItem.getName()).setInventoryID(
+-                    inventories.get(index.getAndIncrement()).getId()
++            items.add(ItemFactory.makeItem(storedItem.getName()).setInventoryFirebaseID(
++                    inventories.get(index.getAndIncrement()).getFirebaseID()
+             ));
+         });
+     }
+Index: app/src/main/java/com/example/autoraidrpg/population/RolePopulation.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/autoraidrpg/population/RolePopulation.java b/app/src/main/java/com/example/autoraidrpg/population/RolePopulation.java
+--- a/app/src/main/java/com/example/autoraidrpg/population/RolePopulation.java	
++++ b/app/src/main/java/com/example/autoraidrpg/population/RolePopulation.java	(date 1684605990126)
+@@ -3,6 +3,7 @@
+ import android.content.Context;
+ import android.database.sqlite.SQLiteOpenHelper;
+ 
++import com.example.autoraidrpg.database.DatabaseHelper;
+ import com.example.autoraidrpg.database.dao.cloud.FormationCloudDAO;
+ import com.example.autoraidrpg.database.dao.cloud.PositionCloudDAO;
+ import com.example.autoraidrpg.database.dao.cloud.RoleCollectionCloudDAO;
+@@ -54,15 +55,14 @@
+         }
+     }
+ 
+-    public static RoleCollection generateFirstRole(Context context, String userFirebaseID) {
++    public static RoleCollection generateFirstRole(Context context, DatabaseHelper dbHelper, String userFirebaseID) {
+         RoleCollection roleCollection = new RoleCollection("NONE", userFirebaseID, 1, 1, 1, 1, 1, 1, 1, 1);
+-        // int newRoleCollectionID = (int) RoleCollectionLocalDAO.store(dbHelper, roleCollection);
+-        // roleCollection.setId(newRoleCollectionID);
+         new RoleCollectionCloudDAO(context).store(roleCollection);
++        RoleCollectionLocalDAO.store(dbHelper, roleCollection);
+         return roleCollection;
+     }
+ 
+-    public static void generateFormation(Context context, String userFirebaseID, String roleCollectionFirebaseID) {
++    public static void generateFormation(Context context, DatabaseHelper dbHelper, String userFirebaseID, String roleCollectionFirebaseID) {
+         for(int i = 0; i < FORMATION_SIZE; i++) {
+             Formation formation = null;
+             PositionCloudDAO positionCloudDAO = new PositionCloudDAO(context);
+@@ -78,25 +78,25 @@
+             positionCloudDAO.store(positionD);
+             positionCloudDAO.store(positionE);
+ 
+-            // int positionID_B = (int) PositionLocalDAO.generate(dbHelper, -1);
+-            // int positionID_C = (int) PositionLocalDAO.generate(dbHelper, -1);
+-            // int positionID_D = (int) PositionLocalDAO.generate(dbHelper, -1);
+-            // int positionID_E = (int) PositionLocalDAO.generate(dbHelper, -1);
++            PositionLocalDAO.generate(dbHelper, "NONE");
++            PositionLocalDAO.generate(dbHelper, "NONE");
++            PositionLocalDAO.generate(dbHelper, "NONE");
++            PositionLocalDAO.generate(dbHelper, "NONE");
+ 
+             if(i == 0) {
+                 // formation your first character at the center back
+                 Position newPosition = new Position("NONE", roleCollectionFirebaseID, 1, false);
+-                // int newPositionID = (int) PositionLocalDAO.store(dbHelper, position);
+                 positionCloudDAO.store(newPosition);
++                PositionLocalDAO.store(dbHelper, newPosition);
+                 formation = new Formation("NONE", userFirebaseID, newPosition.getFirebaseID(), positionB.getFirebaseID(), positionC.getFirebaseID(), positionD.getFirebaseID(), positionE.getFirebaseID());
+             } else {
+                 Position positionA = new Position("NONE", roleCollectionFirebaseID, -1, false);
+-                // int positionID_A = (int) PositionLocalDAO.generate(dbHelper, -1);
++                PositionLocalDAO.generate(dbHelper, "NONE");
+                 formation = new Formation("NONE", userFirebaseID, positionA.getFirebaseID(), positionB.getFirebaseID(), positionC.getFirebaseID(), positionD.getFirebaseID(), positionE.getFirebaseID());
+             }
+ 
+-            // FormationLocalDAO.store(dbHelper, formation);
+             formationCloudDAO.store(formation);
++            FormationLocalDAO.store(dbHelper, formation);
+         }
+     }
+ 
+Index: app/src/main/java/com/example/autoraidrpg/population/StagePopulation.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/autoraidrpg/population/StagePopulation.java b/app/src/main/java/com/example/autoraidrpg/population/StagePopulation.java
+--- a/app/src/main/java/com/example/autoraidrpg/population/StagePopulation.java	
++++ b/app/src/main/java/com/example/autoraidrpg/population/StagePopulation.java	(date 1684606133266)
+@@ -3,17 +3,17 @@
+ import android.content.Context;
+ import android.database.sqlite.SQLiteOpenHelper;
+ 
++import com.example.autoraidrpg.database.DatabaseHelper;
+ import com.example.autoraidrpg.database.dao.cloud.StageCloudDAO;
+ import com.example.autoraidrpg.database.dao.local.StageLocalDAO;
+ import com.example.autoraidrpg.model.Stage;
+ 
+ public class StagePopulation {
+ 
+-    public static void generate(Context context, String userFirebaseID) {
++    public static void generate(Context context, DatabaseHelper dbHelper, String userFirebaseID) {
+         Stage stage = new Stage(userFirebaseID, 1);
+-        // int stageID = (int) StageLocalDAO.store(dbHelper, stage);
+-        // stage.setUserFirebaseID(stageID);
+         new StageCloudDAO(context).store(stage);
++        StageLocalDAO.store(dbHelper, stage);
+     }
+ 
+ }

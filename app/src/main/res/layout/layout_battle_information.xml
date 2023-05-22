@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <include
+        android:id="@+id/roundView"
+        layout="@layout/layout_battle_header" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/battleInformationRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/roundView"
+        tools:listitem="@layout/layout_single_battle_information" />
+
+</RelativeLayout>
